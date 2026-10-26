@@ -16,7 +16,6 @@ const getSizeLabel = (population) => {
     return "Small";
 };
 
-
 function describeCountry(name, capital, population, region = "Unknown") {
     return ` ${name} (${region}) — capital ${capital}, population ${formatPopulation(population)} [${getSizeLabel(population)}]`;
 }
@@ -24,18 +23,21 @@ console.log(formatPopulation(1417492000)); // 1.42B
 console.log(describeCountry("Kenya", "Nairobi", 55100000, "Africa"));
 console.log(describeCountry("Atlantis", "Poseidonia", 900));
 
-
 const countryName = "India";
 const capital = "New Delhi";
 const region = "Asia";
 let population = 1417492000;
 const isLandlocked = false;
-let favourite;  // undefined for now
+let favourite; // undefined for now
 
 console.log(`${countryName} - capital ${capital}, region ${region}`);
 console.log("Population :", population);
-console.log(typeof countryName, typeof capital, typeof isLandlocked, typeof favourite);
-
+console.log(
+    typeof countryName,
+    typeof capital,
+    typeof isLandlocked,
+    typeof favourite,
+);
 
 let sizeLabel;
 if (population >= 100000000) {
@@ -43,28 +45,37 @@ if (population >= 100000000) {
 } else if (population >= 10000000) {
     sizeLabel = "Medium";
 } else {
-    sizeLabel = "Small"
+    sizeLabel = "Small";
 }
 
-console.log(`${countryName} is a ${sizeLabel} country`)
-
+console.log(`${countryName} is a ${sizeLabel} country`);
 
 let regionEmoji;
 switch (region) {
-    case "Asia": regionEmoji = "\u{1F30F}"; break; // 🌏 Asia-Australia
-    case "Europe": regionEmoji = "\u{1F30D}"; break; // 🌍 Europe-Africa
-    case "Africa": regionEmoji = "\u{1F30D}"; break; // 🌍 Europe-Africa
-    case "Americas": regionEmoji = "\u{1F30E}"; break; // 🌎 Americas
-    default: regionEmoji = "\u{1F310}";        // 🌐 globe with meridians
+    case "Asia":
+        regionEmoji = "\u{1F30F}";
+        break; // 🌏 Asia-Australia
+    case "Europe":
+        regionEmoji = "\u{1F30D}";
+        break; // 🌍 Europe-Africa
+    case "Africa":
+        regionEmoji = "\u{1F30D}";
+        break; // 🌍 Europe-Africa
+    case "Americas":
+        regionEmoji = "\u{1F30E}";
+        break; // 🌎 Americas
+    default:
+        regionEmoji = "\u{1F310}"; // 🌐 globe with meridians
 }
 console.log(regionEmoji, region);
 
 const coast = isLandlocked ? "no coastline" : "a coastline";
 console.log(`${countryName} has ${coast}`);
 
-const
-    names = ["India", "Japan", "Brazil", "Kenya", "France", "Australia"];
-const populations = [1417492000, 124500000, 203100000, 55100000, 68200000, 26600000];
+const names = ["India", "Japan", "Brazil", "Kenya", "France", "Australia"];
+const populations = [
+    1417492000, 124500000, 203100000, 55100000, 68200000, 26600000,
+];
 // 1. for loop, using the index
 
 for (let i = 0; i < names.length; i++) {
@@ -78,7 +89,9 @@ for (const name of names) {
 
 // 3. adding up with a loop
 let total = 0;
-for (const p of populations) { total += p; }
+for (const p of populations) {
+    total += p;
+}
 console.log("Total population:", total.toLocaleString());
 
 // 4. while: count down
@@ -88,7 +101,7 @@ while (page > 0) {
     page--;
 }
 
-const favourites = []
+const favourites = [];
 
 function addFavourite(code) {
     if (favourites.includes(code)) {
@@ -104,10 +117,9 @@ function addFavourite(code) {
 
 function removeFavourite(code) {
     const index = favourites.indexOf(code);
-    if (index === -1)
-        return console.log(`${code} not found`);
-    favourites.splice(index,1);
-    console.log("Removed", code,"→", favourites);
+    if (index === -1) return console.log(`${code} not found`);
+    favourites.splice(index, 1);
+    console.log("Removed", code, "→", favourites);
 }
 
 addFavourite("IN");
@@ -115,15 +127,41 @@ addFavourite("JP");
 addFavourite("IN"); // already there
 removeFavourite("JP");
 
-
 const regions = ["Europe", "Asia", "Africa", "Americas", "Oceania"];
 console.log([...regions].sort());
 
 // copy first, then sort
-console.log(regions.slice(0,2));
+console.log(regions.slice(0, 2));
 
 // first two
 console.log(regions.join(" | "));
 
+const india = sampleCountries[0];
+console.log(india.names.common, "→", india.capitals?.[0]?.name);
 
+const { region: indiaRegion, population: indiaPop, codes } = india;
+console.log(indiaRegion, formatPopulation(indiaPop), codes.alpha_2);
 
+for (const country of sampleCountries) {
+    const capital = country.capitals?.[0]?.name ?? "No capital";
+    console.log(`${country.names.common}:${capital}`);
+}
+
+// search: name contains text, ignoring case
+function searchCountries(list, text) {
+    const q = text.trim().toLowerCase();
+    return list.filter(c => c.names.common.toLowerCase().includes(q));
+}
+
+// find by code
+const kenya = sampleCountries.find(c => c.codes.alpha_3 === "KEN");
+
+// total population
+const world = sampleCountries.reduce((sum, c) => sum + c.population, 0);
+
+// sort copies, never the original
+const byPopulation = [...sampleCountries].sort((a, b) => b.population - a.population);
+const byName = [...sampleCountries].sort((a, b) => a.names.common.localeCompare(b.names.common));
+const allNames = sampleCountries.map(c => c.names.common);
+const asian = sampleCountries.filter(c => c.region === "Asia");
+console.log(allNames, asian.length, searchCountries(sampleCountries,"an"), kenya,formatPopulation(world));
