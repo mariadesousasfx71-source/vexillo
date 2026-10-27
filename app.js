@@ -146,24 +146,25 @@ function showCountry(c) {
     setText("country-codes", [c.codes?.alpha_2, c.codes?.alpha_3].filter(Boolean).join(" / "));
     setText("country-borders", c.borders?.length ? c.borders.join(", ") : "None (no land borders)");
 
+    // Map: a clickable Google Maps link
+    const mapCell = document.querySelector("#country-map");
+    mapCell.replaceChildren(); // clear the old link
+    if (c.links?.google_maps) {
+        const a = document.createElement("a");
+        a.href = c.links.google_maps;
+        a.target = "_blank"; // open in a new tab
+        a.textContent = "View on Google Maps";
+        a.className = "underline hover:text-amber-300";
+        mapCell.append(a);
+    } else {
+        mapCell.textContent = "—";
+    }
+
     currentCountry = { code: c.codes?.alpha_3 ?? name, name, flag: flagUrl || "" };
     favBtn.classList.remove("hidden");
     updateHeart();
 }
 
-
-const mapCell = document.querySelector("#country-map");
-mapCell.replaceChildren();                 // clear the old link
-if (c.links?.google_maps) {
-    const a = document.createElement("a");
-    a.href = c.links.google_maps;
-    a.target = "_blank";                   // open in a new tab
-    a.textContent = "View on Google Maps";
-    a.className = "underline hover:text-amber-300";
-    mapCell.append(a);
-} else {
-    mapCell.textContent = "—";
-}
 
 // Compare names ignoring capitals, accents and extra spaces
 function normalise(text) {
