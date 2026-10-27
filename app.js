@@ -306,11 +306,12 @@ function flagCard(c) {
         ? `<img src="${flagUrl}" alt="Flag of ${name}" loading="lazy" class="aspect-[3/2] w-full bg-slate-800 object-cover">`
         : `<div class="flex aspect-[3/2] w-full items-center justify-center bg-slate-800 text-xs text-slate-400">Flag not available</div>`;
     li.innerHTML = `
-        ${flagHtml}
-        <div class="flex flex-1 flex-col justify-center p-2">
-            <p class="text-sm font-bold uppercase leading-tight text-amber-300"></p>
-            <p class="mt-1 text-xs leading-tight text-slate-300"></p>
-        </div>`;
+    ${flagHtml}
+    <div class="flex flex-1 flex-col justify-center p-2">
+        <p class="text-sm font-bold uppercase leading-tight text-amber-300"></p>
+        <p class="mt-1 text-xs leading-tight text-slate-300"></p>
+        <p class="mt-1 text-xs leading-tight text-slate-300"></p>
+    </div>`;
     li.querySelectorAll("p")[0].textContent = name;
     li.querySelectorAll("p")[1].textContent = `Population : ${population}`;
     li.querySelectorAll("p")[2].textContent = capital;
