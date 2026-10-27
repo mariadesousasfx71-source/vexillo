@@ -49,6 +49,14 @@ const message = document.querySelector("#search-message");
 const flagImg = document.querySelector("#flag-img");
 const flagPlaceholder = document.querySelector("#flag-placeholder");
 const favBtn = document.querySelector("#fav-btn");
+const result = document.querySelector("#result");
+
+// Show the result boxes with a fade-in (first search only)
+function showResult() {
+    if (!result.classList.contains("hidden")) return;
+    result.classList.replace("hidden", "grid");
+    requestAnimationFrame(() => requestAnimationFrame(() => result.classList.remove("opacity-0")));
+}
 
 let currentCountry = null; // the country shown right now: { code, name, flag }
 
@@ -128,6 +136,7 @@ form.addEventListener("submit", async (event) => {
         // Prefer an exact name match, e.g. "India" over "British Indian Ocean Territory"
         const exact = results.find((c) => c.names?.common?.toLowerCase() === text.toLowerCase());
         showCountry(exact ?? results[0]);
+        showResult();
         showMessage("");
     } catch (error) {
         showMessage("Something went wrong. Please try again.");
