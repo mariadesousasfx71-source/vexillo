@@ -84,8 +84,8 @@
             <ul class="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-semibold sm:gap-x-6 sm:text-base">
                 <li><a href="index.html" id="nav-home" class="nav-link text-white underline decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">Home</a></li>
                 <li><a href="#flags" id="nav-flags" class="nav-link decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">All Flags</a></li>
-                <li><a href="#regions" class="hover:text-red-400">Regions</a></li>
-                <li><a href="#favourites" class="hover:text-red-400">Favourites</a></li>
+                <li><a href="#regions" id="nav-regions" class="nav-link decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">Regions</a></li>
+                <li><a href="#favourites" id="nav-favourites" class="nav-link decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">Favourites</a></li>
                 <li><a href="#about" class="hover:text-red-400">About</a></li>
             </ul>
         </nav>
@@ -184,7 +184,7 @@
     <!-- All Flags view (opens from the "All Flags" menu link) -->
     <section id="flags" class="mx-auto hidden w-full max-w-7xl flex-1 px-4 pb-8 sm:px-6">
         <!-- Title bar: stays fixed under the nav bar while the flags scroll -->
-        <div id="flags-title" class="sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
+        <div id="flags-title" class="view-title sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
             <h2 class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">Flags of the World</h2>
         </div>
 
@@ -197,6 +197,53 @@
 
         <!-- Grid: 2 per row on phones, 4 on tablets, 6 on laptops, 8 on large screens -->
         <ul id="flags-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"></ul>
+    </section>
+
+    <!-- Regions view (opens from the "Regions" menu link) -->
+    <section id="regions" class="mx-auto hidden w-full max-w-7xl flex-1 px-4 pb-8 sm:px-6">
+        <!-- Title bar with the region box: stays under the nav bar while the flags scroll -->
+        <div class="view-title sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 px-4 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
+            <h2 id="regions-heading" class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">Flags by Region</h2>
+            <form id="region-form" class="mx-auto mt-3 flex max-w-md gap-3">
+                <input id="region-input" type="text" placeholder="Type a region, e.g. Asia" required autocomplete="off" spellcheck="false"
+                    class="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-5 py-2 text-slate-900 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30">
+                <button type="submit"
+                    class="shrink-0 rounded-full bg-blue-900 px-5 py-2 font-semibold text-white shadow hover:bg-red-600">Show</button>
+            </form>
+            <p class="mt-2 text-xs text-slate-300">Africa &middot; Americas &middot; Antarctic &middot; Asia &middot; Europe &middot; Oceania</p>
+            <p id="regions-error" class="mt-2 hidden text-sm font-semibold text-red-300"></p>
+        </div>
+
+        <!-- Loading -->
+        <div id="regions-loader" class="hidden flex-col items-center gap-2 py-10 text-amber-300">
+            <img src="images/globe-loader.svg" alt="" class="h-16 w-16 drop-shadow-lg">
+            <p class="text-sm font-semibold">Loading...</p>
+        </div>
+
+        <!-- Same grid as All Flags -->
+        <ul id="regions-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"></ul>
+    </section>
+
+    <!-- Favourites view (opens from the "Favourites" menu link) -->
+    <section id="favourites" class="mx-auto hidden w-full max-w-5xl flex-1 px-4 pb-8 sm:px-6">
+        <div class="view-title sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
+            <h2 class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">My Favourites</h2>
+        </div>
+
+        <!-- Loading -->
+        <div id="favourites-loader" class="hidden flex-col items-center gap-2 py-10 text-amber-300">
+            <img src="images/globe-loader.svg" alt="" class="h-16 w-16 drop-shadow-lg">
+            <p class="text-sm font-semibold">Loading...</p>
+        </div>
+        <p id="favourites-error" class="hidden text-center font-semibold text-red-300"></p>
+
+        <!-- No favourites yet -->
+        <p id="favourites-empty" class="mx-auto hidden max-w-md rounded-2xl border border-amber-400/60 bg-[#0a1633]/80 px-5 py-4 text-center text-slate-200">
+            No favourites yet. Search a country and tap the <span class="text-red-400">&hearts;</span> to add it here.
+        </p>
+
+        <!-- Grid: 2 per row on phones, 4 from tablet size -->
+        <ul id="favourites-grid" class="grid grid-cols-2 gap-5 sm:grid-cols-4"></ul>
     </section>
 
     <!-- Footer (same navy as the nav bar, golden rope on top) -->

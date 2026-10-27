@@ -237,30 +237,32 @@ document.querySelector("#about-close").addEventListener("click", closeAbout);
 about.addEventListener("click", (e) => { if (e.target === about) closeAbout(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !about.classList.contains("hidden")) closeAbout(); });
 
-// ========== ALL FLAGS ==========
+// ========== ALL FLAGS & REGIONS ==========
 
-const homeView = document.querySelector("#home-view");
-const flagsView = document.querySelector("#flags");
-const flagsGrid = document.querySelector("#flags-grid");
-const flagsLoader = document.querySelector("#flags-loader");
-const flagsError = document.querySelector("#flags-error");
-const navHome = document.querySelector("#nav-home");
-const navFlags = document.querySelector("#nav-flags");
+const views = {
+    home: { section: document.querySelector("#home-view"), link: document.querySelector("#nav-home") },
+    flags: { section: document.querySelector("#flags"), link: document.querySelector("#nav-flags") },
+    regions: { section: document.querySelector("#regions"), link: document.querySelector("#nav-regions") },
+    favourites: { section: document.querySelector("#favourites"), link: document.querySelector("#nav-favourites") },
+};
 
-let allCountries = null; // loaded once, then reused
+let allCountries = null; // loaded once, then reused by All Flags, Regions and Favourites
+let loadingPromise = null;
 
-// Underline the menu link of the page being shown
-function setActiveLink(active) {
-    for (const link of [navHome, navFlags]) {
-        const on = link === active;
-        link.classList.toggle("underline", on);
-        link.classList.toggle("text-white", on);
+// Show one page (home, flags or regions) and underline its menu link
+function showView(name) {
+    for (const [key, view] of Object.entries(views)) {
+        const on = key === name;
+        view.section.classList.toggle("hidden", !on);
+        view.link.classList.toggle("underline", on);
+        view.link.classList.toggle("text-white", on);
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // Fetch every country, 100 at a time (the free plan's maximum page size)
 async function fetchAllCountries() {
-    const fields = "names.common,capitals,flag.url_png,flag.url_svg";
+    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg";
     const list = [];
     let offset = 0;
     let more = true;
@@ -274,6 +276,22 @@ async function fetchAllCountries() {
         offset += 100;
     }
     return list.sort((a, b) => (a.names?.common ?? "").localeCompare(b.names?.common ?? ""));
+}
+
+// Load all countries once, showing the given loader while it loads
+async function loadAllCountries(loader) {
+    if (allCountries) return allCountries;
+    loader.classList.replace("hidden", "flex");
+    try {
+        loadingPromise ??= fetchAllCountries();
+        allCountries = await loadingPromise;
+        return allCountries;
+    } catch (error) {
+        loadingPromise = null; // allow a retry
+        throw error;
+    } finally {
+        loader.classList.replace("flex", "hidden");
+    }
 }
 
 // One small card: flag, name, capital
@@ -297,48 +315,138 @@ function flagCard(c) {
     return li;
 }
 
+// All Flags page
+const flagsGrid = document.querySelector("#flags-grid");
+const flagsError = document.querySelector("#flags-error");
+
 async function showAllFlags(event) {
     event.preventDefault();
-    homeView.classList.add("hidden");
-    flagsView.classList.remove("hidden");
-    setActiveLink(navFlags);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    if (allCountries) return; // already loaded
+    showView("flags");
+    if (flagsGrid.children.length) return; // already shown
 
     flagsError.classList.add("hidden");
-    flagsLoader.classList.replace("hidden", "flex");
     try {
-        allCountries = await fetchAllCountries();
-        flagsGrid.replaceChildren(...allCountries.map(flagCard));
+        const list = await loadAllCountries(document.querySelector("#flags-loader"));
+        flagsGrid.replaceChildren(...list.map(flagCard));
     } catch (error) {
         flagsError.textContent = "Could not load the flags. Please try again.";
         flagsError.classList.remove("hidden");
         console.error(error);
-    } finally {
-        flagsLoader.classList.replace("flex", "hidden");
     }
+}
+
+// Regions page
+const regionForm = document.querySelector("#region-form");
+const regionInput = document.querySelector("#region-input");
+const regionsGrid = document.querySelector("#regions-grid");
+const regionsError = document.querySelector("#regions-error");
+const regionsHeading = document.querySelector("#regions-heading");
+
+function showRegions(event) {
+    event.preventDefault();
+    showView("regions");
+    regionInput.focus();
+}
+
+let regionSearchId = 0;
+
+regionForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const wanted = normalise(regionInput.value);
+    if (!wanted) return;
+    const myId = ++regionSearchId;
+
+    regionsError.classList.add("hidden");
+    regionsGrid.replaceChildren();
+    try {
+        const list = await loadAllCountries(document.querySelector("#regions-loader"));
+        if (myId !== regionSearchId) return; // a newer search has started
+        const inRegion = list.filter((c) => normalise(c.region ?? "") === wanted);
+        if (inRegion.length === 0) {
+            regionsHeading.textContent = "Flags by Region";
+            regionsError.textContent = `Region "${regionInput.value.trim()}" not found. Did you spell it properly?`;
+            regionsError.classList.remove("hidden");
+            regionInput.value = "";
+            regionInput.focus();
+            return;
+        }
+        regionsHeading.textContent = `Flags of ${inRegion[0].region}`;
+        regionsGrid.replaceChildren(...inRegion.map(flagCard));
+    } catch (error) {
+        regionsError.textContent = "Could not load the flags. Please try again.";
+        regionsError.classList.remove("hidden");
+        console.error(error);
+    }
+});
+
+// Favourites page: the countries marked with the heart
+const favGrid = document.querySelector("#favourites-grid");
+const favEmpty = document.querySelector("#favourites-empty");
+const favError = document.querySelector("#favourites-error");
+
+async function showFavourites(event) {
+    event.preventDefault();
+    showView("favourites");
+    favGrid.replaceChildren();
+    favError.classList.add("hidden");
+    favEmpty.classList.toggle("hidden", favourites.length > 0);
+    if (favourites.length === 0) return;
+
+    try {
+        const list = await loadAllCountries(document.querySelector("#favourites-loader"));
+        const byCode = new Map(list.map((c) => [c.codes?.alpha_3, c]));
+        const cards = favourites
+            .map((f) => ({ fav: f, country: byCode.get(f.code) ?? { names: { common: f.name }, flag: { url_png: f.flag } } }))
+            .sort((a, b) => (a.country.names?.common ?? "").localeCompare(b.country.names?.common ?? ""))
+            .map(({ fav, country }) => favouriteCard(country, fav.code));
+        favGrid.replaceChildren(...cards);
+    } catch (error) {
+        favError.textContent = "Could not load your favourites. Please try again.";
+        favError.classList.remove("hidden");
+        console.error(error);
+    }
+}
+
+// Favourite card: the normal flag card plus a red heart to un-mark it
+function favouriteCard(country, code) {
+    const li = flagCard(country);
+    li.classList.add("relative");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.title = "Remove from favourites";
+    btn.setAttribute("aria-label", `Remove ${country.names?.common ?? "country"} from favourites`);
+    btn.className = "absolute right-1.5 top-1.5 rounded-full bg-[#0a1633]/80 p-1.5 text-red-500 shadow transition hover:scale-110";
+    btn.innerHTML = `<svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+        <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.5 2.9 4.5 6.6 4.5c2.1 0 3.6 1.1 4.4 2.6.8-1.5 2.3-2.6 4.4-2.6 3.7 0 5.7 4 4.2 7.3C19.5 16.4 12 21 12 21z"/></svg>`;
+    btn.addEventListener("click", () => {
+        removeFavourite(code);
+        li.remove();
+        if (currentCountry?.code === code) updateHeart(); // keep the search page heart in step
+        favEmpty.classList.toggle("hidden", favourites.length > 0);
+    });
+    li.append(btn);
+    return li;
 }
 
 function showHome(event) {
     event.preventDefault();
-    flagsView.classList.add("hidden");
-    homeView.classList.remove("hidden");
-    setActiveLink(navHome);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    showView("home");
 }
 
-navFlags.addEventListener("click", showAllFlags);
-navHome.addEventListener("click", showHome);
+views.home.link.addEventListener("click", showHome);
+views.flags.link.addEventListener("click", showAllFlags);
+views.regions.link.addEventListener("click", showRegions);
+views.favourites.link.addEventListener("click", showFavourites);
 
-// Keep the "Flags of the World" bar just below the nav bar (the nav bar is sticky from tablet size)
-const flagsTitle = document.querySelector("#flags-title");
+// Keep the title bars just below the nav bar (the nav bar is sticky from tablet size)
 const header = document.querySelector("header");
 
-function placeFlagsTitle() {
+function placeTitleBars() {
     const headerSticks = getComputedStyle(header).position === "sticky";
-    flagsTitle.style.top = headerSticks ? `${header.offsetHeight}px` : "0px";
+    for (const bar of document.querySelectorAll(".view-title")) {
+        bar.style.top = headerSticks ? `${header.offsetHeight}px` : "0px";
+    }
 }
 
-placeFlagsTitle();
-window.addEventListener("resize", placeFlagsTitle);
+placeTitleBars();
+window.addEventListener("resize", placeTitleBars);
