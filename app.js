@@ -153,3 +153,15 @@ form.addEventListener("submit", async (event) => {
         setLoading(false);
     }
 });
+
+// Splash screen: fade out once everything has loaded (shown at least 1.2 seconds)
+const splash = document.querySelector("#splash");
+const splashStart = Date.now();
+
+window.addEventListener("load", () => {
+    const wait = Math.max(0, 1200 - (Date.now() - splashStart));
+    setTimeout(() => {
+        splash.classList.add("opacity-0", "pointer-events-none");
+        setTimeout(() => splash.remove(), 700);
+    }, wait);
+});
