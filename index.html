@@ -25,8 +25,8 @@
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
-         shadow-xl shadow-black/40 = a soft dark shadow below the bar -->
-    <header class="sticky top-0 z-10 bg-blue-950 text-white shadow-xl shadow-black/40">
+         shadow-2xl shadow-black/70 = a big, strong dark shadow below the bar -->
+    <header class="sticky top-0 z-10 bg-blue-950 text-white shadow-2xl shadow-black/70">
         <nav class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-4 md:flex-row md:justify-between">
 
             <!-- Brand: title and tagline -->
@@ -70,8 +70,9 @@
         </section>
 
         <!-- ========== RESULT: 2 boxes ==========
-             grid: 1 column on phones, 2 columns side by side from tablet size (md) -->
-        <section id="result" class="grid gap-6 md:grid-cols-2">
+             grid: 1 column on phones, 2 columns side by side from tablet size (md).
+             mt-16 = extra space above the boxes -->
+        <section id="result" class="mt-16 grid gap-6 md:grid-cols-2">
 
             <!-- Box 1: the flag -->
             <article class="flex items-center justify-center rounded-2xl bg-slate-100 p-6 shadow-lg">
@@ -82,7 +83,8 @@
 
             <!-- Box 2: details about the country -->
             <article class="rounded-2xl bg-slate-100 p-6 shadow-lg">
-                <h3 id="country-name" class="mb-1 text-3xl font-bold text-blue-900">Country name</h3>
+                <!-- uppercase: shows the name in CAPITAL letters, whatever the API sends -->
+                <h3 id="country-name" class="mb-1 text-3xl font-bold uppercase tracking-wide text-blue-900">Country name</h3>
                 <p id="country-official" class="mb-5 text-slate-600">Official name</p>
 
                 <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
