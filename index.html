@@ -9,9 +9,17 @@
         href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
 
+    <!-- Tailwind CSS (browser version, no build step needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
 </head>
 
-<body>
+<body class="min-h-screen bg-white">
+    <!-- Background picture: covers the whole screen, stays still when scrolling,
+         sits behind everything (-z-10) and is see-through (opacity-30 = 30% visible) -->
+    <div class="fixed inset-0 -z-10 bg-[url('images/background.jpg')] bg-cover bg-center bg-no-repeat opacity-30"
+        aria-hidden="true"></div>
+
     <div class="map-watermark" aria-hidden="true">
 <h1>Vexillo</h1>
     <h3>Every flag tells a story</h3>
@@ -21,10 +29,9 @@
     <div class="wrap">
         <header>
             <div class="brand">
-
-
-
-
+            </div>
+        </header>
+    </div>
 
                 <script src="data.js"></script>
                 <script src="app.js"></script>
