@@ -16,18 +16,19 @@
 
 </head>
 
-<body class="min-h-screen overflow-x-hidden bg-white font-['Figtree'] text-slate-900">
+<body class="min-h-screen bg-white font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
          keeps the landmarks in view (bg-bottom), sits behind everything (-z-10).
          opacity-20 + grayscale = a soft, faint watermark that does not distract from the content -->
     <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-20 grayscale"
         aria-hidden="true"></div>
 
-    <!-- Animated compass: half of it peeks in from the right edge, halfway down the screen.
-         right-0 translate-x-1/2 = pushes half of it off the screen; top-1/2 -translate-y-1/2 = vertical centre.
-         Shown only on wide screens (hidden xl:block) so it never covers the boxes. -->
-    <img src="images/compass.gif" alt="" aria-hidden="true"
-        class="pointer-events-none fixed right-0 top-1/2 hidden w-56 translate-x-1/2 -translate-y-1/2 drop-shadow-2xl xl:block 2xl:w-72">
+    <!-- Animated compass: compass-half.gif is the compass tilted to the right and cut in half,
+         so it peeks in from the right edge without its hook.
+         right-0 = touches the right edge; top-1/2 -translate-y-1/2 = vertical centre.
+         -z-[5] = in front of the watermark but behind the boxes. Only on wide screens (hidden xl:block). -->
+    <img src="images/compass-half.gif" alt="" aria-hidden="true"
+        class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[336px] -translate-y-1/2 drop-shadow-2xl xl:block 2xl:w-[432px]">
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
