@@ -20,14 +20,16 @@
     <!-- Background picture: covers the whole screen, stays still when scrolling,
          keeps the landmarks in view (bg-bottom), sits behind everything (-z-10).
          bg-blue-950 on <body> gives a deep navy base; opacity-45 lets the picture show in soft colour on top of it -->
-        <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-45" aria-hidden="true"></div>
+    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-45"
+        aria-hidden="true"></div>
 
     <!-- Animated compass: compass-half.gif is the compass tilted to the right and cut in half,
          so it peeks in from the right edge without its hook.
          right-0 = touches the right edge; top-1/2 -translate-y-1/2 = vertical centre.
-         -z-[5] = in front of the watermark but behind the boxes. Only on wide screens (hidden xl:block). -->
+         -z-[5] = in front of the watermark but behind the boxes. Only on wide screens (hidden xl:block).
+         opacity-50 = the compass is half see-through. -->
     <img src="images/compass-half.gif" alt="" aria-hidden="true"
-        class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[224px] -translate-y-1/2 drop-shadow-2xl xl:block 2xl:w-[288px]">
+        class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[224px] -translate-y-1/2 opacity-50 drop-shadow-2xl xl:block 2xl:w-[288px]">
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
