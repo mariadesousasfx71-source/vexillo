@@ -58,12 +58,27 @@ function setLoading(on) {
     loader.classList.toggle("flex", on);
 }
 
-// Show the result boxes with a fade-in (first search only)
+// Show the result boxes with a fade-in
 function showResult() {
     if (!result.classList.contains("hidden")) return;
     result.classList.replace("hidden", "grid");
     requestAnimationFrame(() => requestAnimationFrame(() => result.classList.remove("opacity-0")));
 }
+
+// Hide the result boxes, so the page looks like the home page again
+function hideResult() {
+    result.classList.replace("grid", "hidden");
+    result.classList.add("opacity-0");
+}
+
+// "New search" button: back to the home page look
+document.querySelector("#new-search-btn").addEventListener("click", () => {
+    hideResult();
+    showMessage("");
+    input.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    input.focus();
+});
 
 let currentCountry = null; // the country shown right now: { code, name, flag }
 
@@ -133,6 +148,7 @@ form.addEventListener("submit", async (event) => {
     const text = input.value.trim();
     if (!text) return;
 
+    hideResult();
     showMessage("");
     setLoading(true);
     try {

@@ -20,7 +20,7 @@
     <div id="splash" class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#0a1633] transition-opacity duration-700" role="status">
         <img src="images/globe-loader.svg" alt="" class="h-28 w-28 drop-shadow-2xl">
         <p class="font-['Cinzel_Decorative'] text-4xl font-black text-white">Vexillo</p>
-        <p class="font-['Dancing_Script'] text-2xl font-bold text-red-400">Every flag tells a story</p>
+        <p class="font-['Dancing_Script'] text-3xl font-bold text-red-400 sm:text-4xl">Every flag tells a story</p>
         <p class="mt-2 text-sm font-semibold tracking-widest text-amber-300">LOADING...</p>
     </div>
 
@@ -144,6 +144,14 @@
                     <dd id="country-borders">—</dd>
                 </dl>
             </article>
+
+            <!-- New search: clears the result and goes back to the home look -->
+            <div class="flex justify-center md:col-span-2">
+                <button id="new-search-btn" type="button"
+                    class="rounded-full border-2 border-amber-400 bg-[#0a1633] px-6 py-2.5 font-semibold text-amber-300 shadow-lg shadow-black/40 transition hover:bg-amber-400 hover:text-[#0a1633]">
+                    &larr; New search
+                </button>
+            </div>
 
         </section>
     </main>
