@@ -81,6 +81,7 @@ function hideResult() {
 // "New search" button: back to the home page look and unlock the search box
 document.querySelector("#new-search-btn").addEventListener("click", () => {
     hideResult();
+    hideSuggestions();
     showMessage("");
     setSearchLocked(false);
     input.value = "";
@@ -183,6 +184,7 @@ form.addEventListener("submit", async (event) => {
     if (!text) return;
 
     hideResult();
+    hideSuggestions();
     showMessage("");
     setLoading(true);
     try {
@@ -236,6 +238,77 @@ document.querySelector('a[href="#about"]').addEventListener("click", openAbout);
 document.querySelector("#about-close").addEventListener("click", closeAbout);
 about.addEventListener("click", (e) => { if (e.target === about) closeAbout(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !about.classList.contains("hidden")) closeAbout(); });
+
+
+// Suggestions while typing (debounced)
+// Suggestions while typing (debounced)
+const suggestions = document.querySelector("#suggestions");
+let debounceTimer;
+let suggestId = 0; // makes sure only the newest suggestions are shown
+
+function hideSuggestions() {
+    suggestions.classList.add("hidden");
+    suggestions.replaceChildren();
+}
+
+async function showSuggestions(text) {
+    const myId = ++suggestId;
+    try {
+        const results = await fetchCountries(text);
+        if (myId !== suggestId) return; // a newer request has started
+        const start = text.toLowerCase();
+        const names = results
+            .map((c) => c.names?.common)
+            .filter(Boolean)
+            .sort((a, b) => b.toLowerCase().startsWith(start) - a.toLowerCase().startsWith(start)) // "In..." names first
+            .slice(0, 6);
+        if (names.length === 0) {
+            hideSuggestions();
+            return;
+        }
+        const items = names.map((name) => {
+            const li = document.createElement("li");
+            li.textContent = name;
+            li.className = "cursor-pointer px-5 py-2 hover:bg-amber-100";
+            return li;
+        });
+        suggestions.replaceChildren(...items);
+        suggestions.classList.remove("hidden");
+    } catch (error) {
+        hideSuggestions();
+        console.error(error);
+    }
+}
+
+input.addEventListener("input", () => {
+    clearTimeout(debounceTimer); // cancel the previous wait
+    const text = input.value.trim();
+    if (text.length < 2) {
+        suggestId++; // ignore any request still on its way
+        hideSuggestions();
+        return;
+    }
+    debounceTimer = setTimeout(() => showSuggestions(text), 300); // fetch only after 300 ms of no typing
+});
+
+// Event delegation: ONE listener on the list handles a click on any suggestion
+suggestions.addEventListener("click", (event) => {
+    const li = event.target.closest("li");
+    if (!li) return;
+    input.value = li.textContent;
+    hideSuggestions();
+    form.requestSubmit(); // runs the normal search
+});
+
+// Hide the list with Esc, or when clicking somewhere else
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") hideSuggestions();
+});
+document.addEventListener("click", (event) => {
+    if (!form.contains(event.target)) hideSuggestions();
+});
+
+
 
 // ========== ALL FLAGS & REGIONS ==========
 

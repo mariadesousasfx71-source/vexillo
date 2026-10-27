@@ -109,9 +109,14 @@
 
         <!-- Search -->
         <section id="search" class="mt-8 mb-8">
-            <form id="search-form" class="mx-auto flex max-w-xl gap-3">
+            <form id="search-form" class="relative mx-auto flex max-w-xl gap-3">
                 <input id="search-input" type="text" placeholder="Type a country, e.g. India" required autocomplete="off" spellcheck="false"
                     class="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-5 py-3 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500">
+                <ul id="suggestions"
+                    class="absolute left-0 right-0 top-full z-20 mt-2 hidden overflow-hidden rounded-2xl border border-slate-300 bg-white text-left text-slate-900 shadow-xl">
+                    <!-- <li class="cursor-pointer px-5 py-2 hover:bg-amber-100">India</li>
+<li class="cursor-pointer px-5 py-2 hover:bg-amber-100">Indonesia</li> -->
+                </ul>
                 <button id="search-btn" type="submit"
                     class="shrink-0 rounded-full bg-blue-900 px-5 py-3 font-semibold sm:px-6 text-white shadow hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900">Search</button>
             </form>
