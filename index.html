@@ -10,6 +10,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Dancing+Script:wght@600;700&family=Figtree:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/compass-logo.png" type="image/png">
 
     <!-- Tailwind CSS (browser version, no build step needed) -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -28,21 +29,26 @@
         <nav class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-4 md:flex-row md:justify-between">
 
             <!-- Brand: title and tagline -->
-            <a href="index.html" class="text-center md:text-left">
+            <a href="index.html" class="flex items-center gap-3 text-center md:text-left">
+                <!-- Logo: brass compass (a small copy of compass_edited.png) -->
+                <img src="images/compass-logo.png" alt="" class="h-16 w-16 md:h-20 md:w-20">
+                <div>
                 <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-blue-900 md:text-5xl">
                     Vexillo
                 </h1>
                 <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-600 md:text-3xl">
                     Every flag tells a story
                 </h2>
+                </div>
             </a>
 
             <!-- Menu links -->
             <ul class="flex flex-wrap justify-center gap-6 font-semibold">
                 <li><a href="index.html" class="text-blue-900 underline decoration-red-600 decoration-2 underline-offset-8">Home</a></li>
-                <li><a href="#countries" class="hover:text-red-600">Countries</a></li>
+                <li><a href="#search" class="hover:text-red-600">Search</a></li>
+                <li><a href="#flags" class="hover:text-red-600">All Flags</a></li>
+                <li><a href="#regions" class="hover:text-red-600">Regions</a></li>
                 <li><a href="#favourites" class="hover:text-red-600">Favourites</a></li>
-                <li><a href="#about" class="hover:text-red-600">About</a></li>
             </ul>
         </nav>
     </header>
