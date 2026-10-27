@@ -87,9 +87,9 @@
         <section id="search" class="mt-8 mb-8">
             <form id="search-form" class="mx-auto flex max-w-xl gap-3">
                 <input id="search-input" type="text" placeholder="Type a country, e.g. India" required
-                    class="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-5 py-3 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30">
-                <button type="submit"
-                    class="shrink-0 rounded-full bg-blue-900 px-5 py-3 font-semibold sm:px-6 text-white shadow hover:bg-red-600">Search</button>
+                    class="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-5 py-3 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500">
+                <button id="search-btn" type="submit"
+                    class="shrink-0 rounded-full bg-blue-900 px-5 py-3 font-semibold sm:px-6 text-white shadow hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900">Search</button>
             </form>
             <!-- Loading: globe turning right to left on its axis -->
             <div id="loader" class="mt-6 hidden flex-col items-center gap-2 text-amber-300" role="status">
@@ -145,11 +145,11 @@
                 </dl>
             </article>
 
-            <!-- New search: clears the result and goes back to the home look -->
-            <div class="flex justify-center md:col-span-2">
+            <!-- New search: clears the result, unlocks the search box (right, below the details) -->
+            <div class="flex justify-end md:col-span-2">
                 <button id="new-search-btn" type="button"
                     class="rounded-full border-2 border-amber-400 bg-[#0a1633] px-6 py-2.5 font-semibold text-amber-300 shadow-lg shadow-black/40 transition hover:bg-amber-400 hover:text-[#0a1633]">
-                    &larr; New search
+                    New search
                 </button>
             </div>
 

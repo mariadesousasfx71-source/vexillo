@@ -50,6 +50,13 @@ const flagImg = document.querySelector("#flag-img");
 const flagPlaceholder = document.querySelector("#flag-placeholder");
 const favBtn = document.querySelector("#fav-btn");
 const result = document.querySelector("#result");
+const searchBtn = document.querySelector("#search-btn");
+
+// Lock or unlock the search box and button
+function setSearchLocked(locked) {
+    input.disabled = locked;
+    searchBtn.disabled = locked;
+}
 const loader = document.querySelector("#loader");
 
 // Show or hide the spinning globe
@@ -71,10 +78,11 @@ function hideResult() {
     result.classList.add("opacity-0");
 }
 
-// "New search" button: back to the home page look
+// "New search" button: back to the home page look and unlock the search box
 document.querySelector("#new-search-btn").addEventListener("click", () => {
     hideResult();
     showMessage("");
+    setSearchLocked(false);
     input.value = "";
     window.scrollTo({ top: 0, behavior: "smooth" });
     input.focus();
@@ -161,6 +169,7 @@ form.addEventListener("submit", async (event) => {
         const exact = results.find((c) => c.names?.common?.toLowerCase() === text.toLowerCase());
         showCountry(exact ?? results[0]);
         showResult();
+        setSearchLocked(true); // locked until "New search" is clicked
         showMessage("");
     } catch (error) {
         showMessage("Something went wrong. Please try again.");
