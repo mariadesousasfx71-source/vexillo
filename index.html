@@ -32,9 +32,9 @@
         class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[224px] -translate-y-1/2 opacity-40 drop-shadow-[-14px_14px_18px_rgba(0,0,0,0.9)] xl:block 2xl:w-[288px]">
 
     <!-- ========== HEADER + NAV BAR ========== -->
-    <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
+    <!-- sticky: stays at the top when scrolling. bg-[#0a1633] = the same dark navy as the boxes,
          shadow-2xl shadow-black/70 = a big, strong dark shadow below the bar -->
-    <header class="sticky top-0 z-10 bg-blue-950 text-white shadow-2xl shadow-black/70">
+    <header class="sticky top-0 z-10 bg-[#0a1633] text-white shadow-2xl shadow-black/70">
         <nav class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-4 md:flex-row md:justify-between">
 
             <!-- Brand: title and tagline -->
@@ -45,7 +45,7 @@
                 <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-white md:text-5xl">
                     Vexillo
                 </h1>
-                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-600 md:text-3xl">
+                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-400 md:text-3xl">
                     Every flag tells a story
                 </h2>
                 </div>
@@ -60,6 +60,12 @@
                 <li><a href="#favourites" class="hover:text-red-400">Favourites</a></li>
             </ul>
         </nav>
+
+        <!-- Golden rope along the bottom: thin diagonal stripes in light, mid and dark gold
+             (repeating-linear-gradient) look like twisted rope strands -->
+        <div aria-hidden="true"
+            class="h-2.5 bg-[repeating-linear-gradient(135deg,#fde68a_0_3px,#f59e0b_3px_7px,#92400e_7px_10px)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.5)]">
+        </div>
     </header>
 
     <!-- mx-auto max-w-5xl keeps everything in the centre of the screen -->
