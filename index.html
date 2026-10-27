@@ -25,6 +25,9 @@
          (overflow-clip, not overflow-hidden, so the sticky nav bar still works). -->
     <div class="relative mx-auto min-h-screen max-w-7xl overflow-clip shadow-2xl shadow-black/60">
 
+    <!-- Navy base for the container (the picture at 45% sits on top of this colour) -->
+    <div class="absolute inset-0 -z-20 bg-blue-950" aria-hidden="true"></div>
+
     <!-- Background picture: fills ONLY this page container (absolute inset-0), not the whole screen.
          opacity-45 over the navy page colour; bg-center keeps the signpost in view;
          blur-[1px] softens it slightly; scale-105 hides the blurred edges -->
