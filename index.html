@@ -18,9 +18,16 @@
 
 <body class="min-h-screen overflow-x-hidden bg-blue-950 font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
-         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10).
+         sits behind everything (-z-10).
          bg-blue-950 on <body> gives a deep navy base; opacity-45 lets the picture show in soft colour on top of it -->
-    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-45"
+    <!-- bg-center keeps the signpost and the sea in view; blur-[1px] softens it slightly;
+         scale-105 hides the blurred edges -->
+    <div class="fixed inset-0 -z-10 scale-105 bg-[url('images/background.png')] bg-cover bg-center bg-no-repeat opacity-45 blur-[1px]"
+        aria-hidden="true"></div>
+
+    <!-- Navy fade: clear at the top, getting darker towards the bottom, so the page stays calm.
+         bg-linear-to-b = a gradient from top to bottom. -->
+    <div class="fixed inset-0 -z-[9] bg-linear-to-b from-transparent via-[#0a1633]/30 to-[#0a1633]/85"
         aria-hidden="true"></div>
 
     <!-- Animated compass: compass-half.gif is the compass tilted to the right and cut in half,
