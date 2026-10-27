@@ -216,3 +216,21 @@ window.addEventListener("load", () => {
         setTimeout(() => splash.remove(), 700);
     }, wait);
 });
+
+// About popup: opens only when "About" in the menu is clicked
+const about = document.querySelector("#about");
+
+function openAbout(event) {
+    event.preventDefault();
+    about.classList.replace("hidden", "flex");
+    document.querySelector("#about-close").focus();
+}
+
+function closeAbout() {
+    about.classList.replace("flex", "hidden");
+}
+
+document.querySelector('a[href="#about"]').addEventListener("click", openAbout);
+document.querySelector("#about-close").addEventListener("click", closeAbout);
+about.addEventListener("click", (e) => { if (e.target === about) closeAbout(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !about.classList.contains("hidden")) closeAbout(); });
