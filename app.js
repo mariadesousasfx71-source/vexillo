@@ -335,7 +335,7 @@ function showView(name) {
 
 // Fetch every country, 100 at a time (the free plan's maximum page size)
 async function fetchAllCountries() {
-    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg, population";
+    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg,population";
     const list = [];
     let offset = 0;
     let more = true;
@@ -371,7 +371,7 @@ async function loadAllCountries(loader) {
 function flagCard(c) {
     const name = c.names?.common ?? "Unknown";
     const capital = c.capitals?.map((cap) => cap.name).join(", ") || "No capital";
-    const population = c.population ? c.population : "Unknown";
+    const population = c.population ? c.population.toLocaleString() : "Unknown";
     const li = document.createElement("li");
     li.className = "flex flex-col overflow-hidden rounded-xl border border-amber-400/70 bg-[#0a1633] text-center shadow-lg shadow-black/40 transition hover:-translate-y-1 hover:border-amber-300";
     const flagUrl = c.flag?.url_png || c.flag?.url_svg; // a few disputed regions have no flag in the API
@@ -386,7 +386,7 @@ function flagCard(c) {
         <p class="mt-1 text-xs leading-tight text-slate-300"></p>
     </div>`;
     li.querySelectorAll("p")[0].textContent = name;
-    li.querySelectorAll("p")[1].textContent = `Population : ${population}`;
+    li.querySelectorAll("p")[1].textContent = `Population: ${population}`;
     li.querySelectorAll("p")[2].textContent = capital;
     return li;
 }
