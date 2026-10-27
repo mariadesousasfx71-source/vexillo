@@ -19,12 +19,12 @@
     <!-- Page container (laptop width) -->
     <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col overflow-clip shadow-2xl shadow-black/60">
 
-    <!-- Background picture (full colour) -->
-    <div class="absolute inset-0 -z-10 scale-105 bg-[url('images/background.png')] bg-cover bg-center bg-no-repeat blur-[1px]"
+    <!-- Background picture (bright, rich colour) -->
+    <div class="absolute inset-0 -z-10 scale-105 bg-[url('images/background.png')] bg-cover bg-center bg-no-repeat brightness-110 saturate-125"
         aria-hidden="true"></div>
 
-    <!-- Navy fade towards the bottom -->
-    <div class="absolute inset-0 -z-[9] bg-linear-to-b from-transparent via-[#0a1633]/30 to-[#0a1633]/85"
+    <!-- Light navy fade at the very bottom (keeps the footer area calm) -->
+    <div class="absolute inset-0 -z-[9] bg-linear-to-b from-transparent from-60% to-[#0a1633]/40"
         aria-hidden="true"></div>
 
     <!-- Animated compass (wide screens only) -->
@@ -89,8 +89,16 @@
             </article>
 
             <!-- Details -->
-            <article class="rounded-2xl p-5 sm:p-8 text-white border-2 border-amber-400 bg-[#0a1633] shadow-xl shadow-black/50 outline-1 outline-amber-400/40 -outline-offset-8">
-                <h3 id="country-name" class="mb-1 break-words text-2xl font-bold uppercase sm:text-3xl tracking-wide text-amber-300">Country name</h3>
+            <article class="relative rounded-2xl p-5 sm:p-8 text-white border-2 border-amber-400 bg-[#0a1633] shadow-xl shadow-black/50 outline-1 outline-amber-400/40 -outline-offset-8">
+                <!-- Favourite heart (shown after a search) -->
+                <button id="fav-btn" type="button" aria-pressed="false" aria-label="Add to favourites" title="Add to favourites"
+                    class="absolute right-5 top-5 hidden rounded-full p-2 text-amber-300 transition hover:scale-110 hover:bg-white/10 sm:right-6 sm:top-6">
+                    <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                        <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.5 2.9 4.5 6.6 4.5c2.1 0 3.6 1.1 4.4 2.6.8-1.5 2.3-2.6 4.4-2.6 3.7 0 5.7 4 4.2 7.3C19.5 16.4 12 21 12 21z"/>
+                    </svg>
+                </button>
+
+                <h3 id="country-name" class="mb-1 break-words pr-12 text-2xl font-bold uppercase sm:text-3xl tracking-wide text-amber-300">Country name</h3>
                 <p id="country-official" class="mb-5 text-slate-300">Official name</p>
 
                 <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 break-words sm:gap-x-6">
@@ -124,7 +132,7 @@
         </div>
         <div class="px-4 py-5">
             <p>&copy; 2026 <span class="font-['Cinzel_Decorative'] font-bold text-white">Vexillo</span>. All rights reserved.</p>
-            <p class="mt-1">Designed by <span class="font-semibold text-amber-300">Maria de Sousa</span>, Full Stack Development Course, WsCube Tech</p>
+            <p class="mt-1">Designed by <span class="font-semibold text-amber-300">Maria de Sousa</span>, Full Stack Development Course, WsCube Tech. India</p>
         </div>
     </footer>
 
