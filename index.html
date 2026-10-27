@@ -9,7 +9,6 @@
          Figtree (normal text) -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Dancing+Script:wght@600;700&family=Figtree:wght@400;600;700&display=swap">
-    <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="images/compass-logo.png" type="image/png">
 
     <!-- Tailwind CSS (browser version, no build step needed) -->
@@ -19,9 +18,15 @@
 
 <body class="min-h-screen bg-white font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
-         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10) and is see-through (opacity-75 = 75% visible) -->
-    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-75"
+         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10).
+         opacity-20 + grayscale = a soft, faint watermark that does not distract from the content -->
+    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-20 grayscale"
         aria-hidden="true"></div>
+
+    <!-- Animated compass: fixed at the right, halfway down the screen (top-1/2 -translate-y-1/2).
+         Shown only on wide screens (hidden xl:block) so it never covers the boxes. -->
+    <img src="images/compass.gif" alt="" aria-hidden="true"
+        class="pointer-events-none fixed right-6 top-1/2 hidden w-28 -translate-y-1/2 drop-shadow-xl xl:block 2xl:right-12 2xl:w-40">
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
@@ -58,7 +63,8 @@
     <main class="mx-auto max-w-5xl px-4 py-10">
 
         <!-- ========== SEARCH ========== -->
-        <section id="search" class="mb-8">
+        <!-- mt-8 = moves the search bar a little further down from the nav bar -->
+        <section id="search" class="mt-8 mb-8">
             <form id="search-form" class="mx-auto flex max-w-xl gap-3">
                 <input id="search-input" type="text" placeholder="Type a country, e.g. India" required
                     class="flex-1 rounded-full border border-slate-300 bg-white px-5 py-3 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30">
@@ -111,7 +117,6 @@
         </section>
     </main>
 
-    <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
 
