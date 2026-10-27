@@ -24,8 +24,9 @@
         aria-hidden="true"></div>
 
     <!-- ========== HEADER + NAV BAR ========== -->
-    <!-- sticky: stays at the top when scrolling. bg-white/70 = white at 70%, backdrop-blur blurs the picture behind it -->
-    <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/70 backdrop-blur">
+    <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
+         shadow-xl shadow-black/40 = a soft dark shadow below the bar -->
+    <header class="sticky top-0 z-10 bg-blue-950 text-white shadow-xl shadow-black/40">
         <nav class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-4 md:flex-row md:justify-between">
 
             <!-- Brand: title and tagline -->
@@ -33,10 +34,10 @@
                 <!-- Logo: brass compass (a small copy of compass_edited.png) -->
                 <img src="images/compass-logo.png" alt="" class="h-16 w-16 md:h-20 md:w-20">
                 <div>
-                <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-blue-900 md:text-5xl">
+                <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-white md:text-5xl">
                     Vexillo
                 </h1>
-                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-600 md:text-3xl">
+                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-400 md:text-3xl">
                     Every flag tells a story
                 </h2>
                 </div>
@@ -44,11 +45,11 @@
 
             <!-- Menu links -->
             <ul class="flex flex-wrap justify-center gap-6 font-semibold">
-                <li><a href="index.html" class="text-blue-900 underline decoration-red-600 decoration-2 underline-offset-8">Home</a></li>
-                <li><a href="#search" class="hover:text-red-600">Search</a></li>
-                <li><a href="#flags" class="hover:text-red-600">All Flags</a></li>
-                <li><a href="#regions" class="hover:text-red-600">Regions</a></li>
-                <li><a href="#favourites" class="hover:text-red-600">Favourites</a></li>
+                <li><a href="index.html" class="text-white underline decoration-red-400 decoration-2 underline-offset-8">Home</a></li>
+                <li><a href="#search" class="hover:text-red-400">Search</a></li>
+                <li><a href="#flags" class="hover:text-red-400">All Flags</a></li>
+                <li><a href="#regions" class="hover:text-red-400">Regions</a></li>
+                <li><a href="#favourites" class="hover:text-red-400">Favourites</a></li>
             </ul>
         </nav>
     </header>
