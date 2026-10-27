@@ -126,10 +126,12 @@ function setText(id, value) {
 function showCountry(c) {
     const name = c.names?.common ?? "Unknown";
 
-    flagImg.src = c.flag?.url_svg ?? c.flag?.url_png ?? "";
+    const flagUrl = c.flag?.url_svg || c.flag?.url_png;
+    flagImg.src = flagUrl || "";
     flagImg.alt = `Flag of ${name}`;
-    flagImg.classList.remove("hidden");
-    flagPlaceholder.classList.add("hidden");
+    flagImg.classList.toggle("hidden", !flagUrl);
+    flagPlaceholder.textContent = flagUrl ? "The flag will appear here" : "Flag not available";
+    flagPlaceholder.classList.toggle("hidden", !!flagUrl);
 
     setText("country-name", name);
     setText("country-official", c.names?.official);
@@ -140,7 +142,7 @@ function showCountry(c) {
     setText("country-codes", [c.codes?.alpha_2, c.codes?.alpha_3].filter(Boolean).join(" / "));
     setText("country-borders", c.borders?.length ? c.borders.join(", ") : "None (no land borders)");
 
-    currentCountry = { code: c.codes?.alpha_3 ?? name, name, flag: flagImg.src };
+    currentCountry = { code: c.codes?.alpha_3 ?? name, name, flag: flagUrl || "" };
     favBtn.classList.remove("hidden");
     updateHeart();
 }
@@ -280,9 +282,12 @@ function flagCard(c) {
     const capital = c.capitals?.map((cap) => cap.name).join(", ") || "No capital";
     const li = document.createElement("li");
     li.className = "flex flex-col overflow-hidden rounded-xl border border-amber-400/70 bg-[#0a1633] text-center shadow-lg shadow-black/40 transition hover:-translate-y-1 hover:border-amber-300";
+    const flagUrl = c.flag?.url_png || c.flag?.url_svg; // a few disputed regions have no flag in the API
+    const flagHtml = flagUrl
+        ? `<img src="${flagUrl}" alt="Flag of ${name}" loading="lazy" class="aspect-[3/2] w-full bg-slate-800 object-cover">`
+        : `<div class="flex aspect-[3/2] w-full items-center justify-center bg-slate-800 text-xs text-slate-400">Flag not available</div>`;
     li.innerHTML = `
-        <img src="${c.flag?.url_png ?? c.flag?.url_svg ?? ""}" alt="Flag of ${name}" loading="lazy"
-            class="aspect-[3/2] w-full bg-slate-800 object-cover">
+        ${flagHtml}
         <div class="flex flex-1 flex-col justify-center p-2">
             <p class="text-sm font-bold uppercase leading-tight text-amber-300"></p>
             <p class="mt-1 text-xs leading-tight text-slate-300"></p>
@@ -306,7 +311,6 @@ async function showAllFlags(event) {
     try {
         allCountries = await fetchAllCountries();
         flagsGrid.replaceChildren(...allCountries.map(flagCard));
-        document.querySelector("#flags-count").textContent = `${allCountries.length} countries`;
     } catch (error) {
         flagsError.textContent = "Could not load the flags. Please try again.";
         flagsError.classList.remove("hidden");
@@ -326,3 +330,15 @@ function showHome(event) {
 
 navFlags.addEventListener("click", showAllFlags);
 navHome.addEventListener("click", showHome);
+
+// Keep the "Flags of the World" bar just below the nav bar (the nav bar is sticky from tablet size)
+const flagsTitle = document.querySelector("#flags-title");
+const header = document.querySelector("header");
+
+function placeFlagsTitle() {
+    const headerSticks = getComputedStyle(header).position === "sticky";
+    flagsTitle.style.top = headerSticks ? `${header.offsetHeight}px` : "0px";
+}
+
+placeFlagsTitle();
+window.addEventListener("resize", placeFlagsTitle);

@@ -182,10 +182,10 @@
     </main>
 
     <!-- All Flags view (opens from the "All Flags" menu link) -->
-    <section id="flags" class="mx-auto hidden w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <div class="mb-6 text-center">
-            <h2 class="font-['Cinzel_Decorative'] text-3xl font-bold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Flags of the World</h2>
-            <p id="flags-count" class="mt-1 font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"></p>
+    <section id="flags" class="mx-auto hidden w-full max-w-7xl flex-1 px-4 pb-8 sm:px-6">
+        <!-- Title bar: stays fixed under the nav bar while the flags scroll -->
+        <div id="flags-title" class="sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
+            <h2 class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">Flags of the World</h2>
         </div>
 
         <!-- Loading -->
