@@ -271,13 +271,17 @@ function hideSuggestions() {
 async function showSuggestions(text) {
     const myId = ++suggestId;
     try {
-        const results = await fetchCountries(text);
+        // Fast path: once all countries are loaded, filter them right here (no waiting for the API).
+        // Until then, ask the API for matching names.
+        const wanted = normalise(text);
+        const results = allCountries ?? (await fetchCountries(text));
         if (myId !== suggestId) return; // a newer request has started
-        const start = text.toLowerCase();
+        // Keep names where a word starts with what was typed: "In" -> India, Indonesia (not Argentina)
+        const startsWord = (name) => normalise(name).split(/[\s-]+/).some((word) => word.startsWith(wanted));
         const names = results
             .map((c) => c.names?.common)
-            .filter(Boolean)
-            .sort((a, b) => b.toLowerCase().startsWith(start) - a.toLowerCase().startsWith(start)) // "In..." names first
+            .filter((name) => name && startsWord(name))
+            .sort((a, b) => normalise(b).startsWith(wanted) - normalise(a).startsWith(wanted)) // "In..." names first
             .slice(0, 6);
         if (names.length === 0) {
             hideSuggestions();
@@ -305,7 +309,14 @@ input.addEventListener("input", () => {
         hideSuggestions();
         return;
     }
-    debounceTimer = setTimeout(() => showSuggestions(text), 300); // fetch only after 300 ms of no typing
+    const wait = allCountries ? 120 : 300; // shorter wait when no fetch is needed
+    debounceTimer = setTimeout(() => showSuggestions(text), wait); // only after a short pause in typing
+});
+
+// Load the country list in the background once the page has loaded,
+// so suggestions (and All Flags) can then appear instantly
+window.addEventListener("load", () => {
+    loadAllCountries().catch((error) => console.error(error));
 });
 
 // Event delegation: ONE listener on the list handles a click on any suggestion
@@ -371,7 +382,7 @@ async function fetchAllCountries() {
 // Load all countries once, showing the given loader while it loads
 async function loadAllCountries(loader) {
     if (allCountries) return allCountries;
-    loader.classList.replace("hidden", "flex");
+    loader?.classList.replace("hidden", "flex"); // loader is optional (no spinner for background loading)
     try {
         loadingPromise ??= fetchAllCountries();
         allCountries = await loadingPromise;
@@ -380,7 +391,7 @@ async function loadAllCountries(loader) {
         loadingPromise = null; // allow a retry
         throw error;
     } finally {
-        loader.classList.replace("flex", "hidden");
+        loader?.classList.replace("flex", "hidden");
     }
 }
 
