@@ -418,15 +418,22 @@ function favouriteCard(country, code) {
     btn.className = "absolute right-1.5 top-1.5 rounded-full bg-[#0a1633]/80 p-1.5 text-red-500 shadow transition hover:scale-110";
     btn.innerHTML = `<svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
         <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.5 2.9 4.5 6.6 4.5c2.1 0 3.6 1.1 4.4 2.6.8-1.5 2.3-2.6 4.4-2.6 3.7 0 5.7 4 4.2 7.3C19.5 16.4 12 21 12 21z"/></svg>`;
-    btn.addEventListener("click", () => {
-        removeFavourite(code);
-        li.remove();
-        if (currentCountry?.code === code) updateHeart(); // keep the search page heart in step
-        favEmpty.classList.toggle("hidden", favourites.length > 0);
-    });
+    btn.dataset.code = code; // read by the grid's click listener below
     li.append(btn);
     return li;
 }
+
+// Event delegation: ONE click listener on the favourites grid handles every heart,
+// instead of a separate listener on each card
+favGrid.addEventListener("click", (event) => {
+    const btn = event.target.closest("button[data-code]");
+    if (!btn) return; // the click was not on a heart
+    const code = btn.dataset.code;
+    removeFavourite(code);
+    btn.closest("li").remove();
+    if (currentCountry?.code === code) updateHeart(); // keep the search page heart in step
+    favEmpty.classList.toggle("hidden", favourites.length > 0);
+});
 
 function showHome(event) {
     event.preventDefault();
