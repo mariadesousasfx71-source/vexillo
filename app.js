@@ -234,3 +234,95 @@ document.querySelector('a[href="#about"]').addEventListener("click", openAbout);
 document.querySelector("#about-close").addEventListener("click", closeAbout);
 about.addEventListener("click", (e) => { if (e.target === about) closeAbout(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !about.classList.contains("hidden")) closeAbout(); });
+
+// ========== ALL FLAGS ==========
+
+const homeView = document.querySelector("#home-view");
+const flagsView = document.querySelector("#flags");
+const flagsGrid = document.querySelector("#flags-grid");
+const flagsLoader = document.querySelector("#flags-loader");
+const flagsError = document.querySelector("#flags-error");
+const navHome = document.querySelector("#nav-home");
+const navFlags = document.querySelector("#nav-flags");
+
+let allCountries = null; // loaded once, then reused
+
+// Underline the menu link of the page being shown
+function setActiveLink(active) {
+    for (const link of [navHome, navFlags]) {
+        const on = link === active;
+        link.classList.toggle("underline", on);
+        link.classList.toggle("text-white", on);
+    }
+}
+
+// Fetch every country, 100 at a time (the free plan's maximum page size)
+async function fetchAllCountries() {
+    const fields = "names.common,capitals,flag.url_png,flag.url_svg";
+    const list = [];
+    let offset = 0;
+    let more = true;
+    while (more) {
+        const url = `https://api.restcountries.com/countries/v5?limit=100&offset=${offset}&response_fields=${fields}`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
+        if (!res.ok) throw new Error(`Request failed (${res.status})`);
+        const json = await res.json();
+        list.push(...(json.data?.objects ?? []));
+        more = json.data?.meta?.more === true;
+        offset += 100;
+    }
+    return list.sort((a, b) => (a.names?.common ?? "").localeCompare(b.names?.common ?? ""));
+}
+
+// One small card: flag, name, capital
+function flagCard(c) {
+    const name = c.names?.common ?? "Unknown";
+    const capital = c.capitals?.map((cap) => cap.name).join(", ") || "No capital";
+    const li = document.createElement("li");
+    li.className = "flex flex-col overflow-hidden rounded-xl border border-amber-400/70 bg-[#0a1633] text-center shadow-lg shadow-black/40 transition hover:-translate-y-1 hover:border-amber-300";
+    li.innerHTML = `
+        <img src="${c.flag?.url_png ?? c.flag?.url_svg ?? ""}" alt="Flag of ${name}" loading="lazy"
+            class="aspect-[3/2] w-full bg-slate-800 object-cover">
+        <div class="flex flex-1 flex-col justify-center p-2">
+            <p class="text-sm font-bold uppercase leading-tight text-amber-300"></p>
+            <p class="mt-1 text-xs leading-tight text-slate-300"></p>
+        </div>`;
+    li.querySelectorAll("p")[0].textContent = name;
+    li.querySelectorAll("p")[1].textContent = capital;
+    return li;
+}
+
+async function showAllFlags(event) {
+    event.preventDefault();
+    homeView.classList.add("hidden");
+    flagsView.classList.remove("hidden");
+    setActiveLink(navFlags);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (allCountries) return; // already loaded
+
+    flagsError.classList.add("hidden");
+    flagsLoader.classList.replace("hidden", "flex");
+    try {
+        allCountries = await fetchAllCountries();
+        flagsGrid.replaceChildren(...allCountries.map(flagCard));
+        document.querySelector("#flags-count").textContent = `${allCountries.length} countries`;
+    } catch (error) {
+        flagsError.textContent = "Could not load the flags. Please try again.";
+        flagsError.classList.remove("hidden");
+        console.error(error);
+    } finally {
+        flagsLoader.classList.replace("flex", "hidden");
+    }
+}
+
+function showHome(event) {
+    event.preventDefault();
+    flagsView.classList.add("hidden");
+    homeView.classList.remove("hidden");
+    setActiveLink(navHome);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+navFlags.addEventListener("click", showAllFlags);
+navHome.addEventListener("click", showHome);

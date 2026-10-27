@@ -82,8 +82,8 @@
 
             <!-- Menu links -->
             <ul class="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-semibold sm:gap-x-6 sm:text-base">
-                <li><a href="index.html" class="text-white underline decoration-red-400 decoration-2 underline-offset-8">Home</a></li>
-                <li><a href="#flags" class="hover:text-red-400">All Flags</a></li>
+                <li><a href="index.html" id="nav-home" class="nav-link text-white underline decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">Home</a></li>
+                <li><a href="#flags" id="nav-flags" class="nav-link decoration-red-400 decoration-2 underline-offset-8 hover:text-red-400">All Flags</a></li>
                 <li><a href="#regions" class="hover:text-red-400">Regions</a></li>
                 <li><a href="#favourites" class="hover:text-red-400">Favourites</a></li>
                 <li><a href="#about" class="hover:text-red-400">About</a></li>
@@ -96,7 +96,7 @@
         </div>
     </header>
 
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 md:py-10">
+    <main id="home-view" class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 md:py-10">
 
         <!-- Welcome note: what the app does -->
         <section class="mx-auto mt-2 max-w-3xl rounded-2xl border border-amber-400/60 bg-[#0a1633]/80 px-5 py-6 text-center text-white shadow-xl shadow-black/40 backdrop-blur-sm sm:px-8 md:mt-6">
@@ -180,6 +180,24 @@
         </section>
 
     </main>
+
+    <!-- All Flags view (opens from the "All Flags" menu link) -->
+    <section id="flags" class="mx-auto hidden w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+        <div class="mb-6 text-center">
+            <h2 class="font-['Cinzel_Decorative'] text-3xl font-bold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Flags of the World</h2>
+            <p id="flags-count" class="mt-1 font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"></p>
+        </div>
+
+        <!-- Loading -->
+        <div id="flags-loader" class="hidden flex-col items-center gap-2 py-10 text-amber-300">
+            <img src="images/globe-loader.svg" alt="" class="h-16 w-16 drop-shadow-lg">
+            <p class="text-sm font-semibold">Loading...</p>
+        </div>
+        <p id="flags-error" class="hidden text-center font-semibold text-red-300"></p>
+
+        <!-- Grid: 2 per row on phones, 4 on tablets, 6 on laptops, 8 on large screens -->
+        <ul id="flags-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"></ul>
+    </section>
 
     <!-- Footer (same navy as the nav bar, golden rope on top) -->
     <footer class="bg-[#0a1633] text-center text-sm text-slate-300 shadow-[0_-10px_25px_rgba(0,0,0,0.5)]">
