@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vexillo-Every flag tells a story</title>
+    <!-- Fonts: Cinzel Decorative (artistic title), Dancing Script (handwritten tagline),
+         Figtree (normal text) -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;600;700&display=swap">
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Dancing+Script:wght@600;700&family=Figtree:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
 
     <!-- Tailwind CSS (browser version, no build step needed) -->
@@ -14,27 +16,43 @@
 
 </head>
 
-<body class="min-h-screen bg-white">
+<body class="min-h-screen bg-white font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
-         sits behind everything (-z-10) and is see-through (opacity-30 = 30% visible) -->
-    <div class="fixed inset-0 -z-10 bg-[url('images/background.jpg')] bg-cover bg-center bg-no-repeat opacity-30"
+         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10) and is see-through (opacity-50 = 50% visible) -->
+    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-50"
         aria-hidden="true"></div>
 
-    <div class="map-watermark" aria-hidden="true">
-<h1>Vexillo</h1>
-    <h3>Every flag tells a story</h3>
+    <!-- ========== HEADER + NAV BAR ========== -->
+    <!-- sticky: stays at the top when scrolling. bg-white/70 = white at 70%, backdrop-blur blurs the picture behind it -->
+    <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/70 backdrop-blur">
+        <nav class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-4 md:flex-row md:justify-between">
 
-    </div>
-    
-    <div class="wrap">
-        <header>
-            <div class="brand">
-            </div>
-        </header>
-    </div>
+            <!-- Brand: title and tagline -->
+            <a href="index.html" class="text-center md:text-left">
+                <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-blue-900 md:text-5xl">
+                    Vexillo
+                </h1>
+                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-600 md:text-3xl">
+                    Every flag tells a story
+                </h2>
+            </a>
 
-                <script src="data.js"></script>
-                <script src="app.js"></script>
+            <!-- Menu links -->
+            <ul class="flex flex-wrap justify-center gap-6 font-semibold">
+                <li><a href="index.html" class="text-blue-900 underline decoration-red-600 decoration-2 underline-offset-8">Home</a></li>
+                <li><a href="#countries" class="hover:text-red-600">Countries</a></li>
+                <li><a href="#favourites" class="hover:text-red-600">Favourites</a></li>
+                <li><a href="#about" class="hover:text-red-600">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-10">
+        <!-- page content goes here -->
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
