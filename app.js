@@ -139,7 +139,7 @@ function showCountry(c) {
     setText("country-capital", c.capitals?.map((cap) => cap.name).join(", "));
     setText("country-region", c.region);
     setText("country-subregion", c.subregion);
-    setText("country-population", c.population ? `${formatPopulation(c.population)} (${getSizeLabel(c.population)})` : "");
+    setText("country-population", c.population ? `${c.population.toLocaleString()} (${getSizeLabel(c.population)})` : "");
     setText("country-codes", [c.codes?.alpha_2, c.codes?.alpha_3].filter(Boolean).join(" / "));
     setText("country-borders", c.borders?.length ? c.borders.join(", ") : "None (no land borders)");
 
@@ -240,7 +240,6 @@ about.addEventListener("click", (e) => { if (e.target === about) closeAbout(); }
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !about.classList.contains("hidden")) closeAbout(); });
 
 
-// Suggestions while typing (debounced)
 // Suggestions while typing (debounced)
 const suggestions = document.querySelector("#suggestions");
 let debounceTimer;
