@@ -16,17 +16,18 @@
 
 </head>
 
-<body class="min-h-screen bg-white font-['Figtree'] text-slate-900">
+<body class="min-h-screen overflow-x-hidden bg-white font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
          keeps the landmarks in view (bg-bottom), sits behind everything (-z-10).
          opacity-20 + grayscale = a soft, faint watermark that does not distract from the content -->
     <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-20 grayscale"
         aria-hidden="true"></div>
 
-    <!-- Animated compass: fixed at the right, halfway down the screen (top-1/2 -translate-y-1/2).
+    <!-- Animated compass: half of it peeks in from the right edge, halfway down the screen.
+         right-0 translate-x-1/2 = pushes half of it off the screen; top-1/2 -translate-y-1/2 = vertical centre.
          Shown only on wide screens (hidden xl:block) so it never covers the boxes. -->
     <img src="images/compass.gif" alt="" aria-hidden="true"
-        class="pointer-events-none fixed right-6 top-1/2 hidden w-28 -translate-y-1/2 drop-shadow-xl xl:block 2xl:right-12 2xl:w-40">
+        class="pointer-events-none fixed right-0 top-1/2 hidden w-56 translate-x-1/2 -translate-y-1/2 drop-shadow-2xl xl:block 2xl:w-72">
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
