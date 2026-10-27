@@ -24,6 +24,17 @@
         <p class="mt-2 text-sm font-semibold tracking-widest text-amber-300">LOADING...</p>
     </div>
 
+    <!-- Not-found popup -->
+    <div id="notfound" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60 px-4" role="alertdialog" aria-labelledby="notfound-title">
+        <div class="w-full max-w-sm rounded-2xl border-2 border-amber-400 bg-[#0a1633] p-6 text-center text-white shadow-2xl outline-1 outline-amber-400/40 -outline-offset-8">
+            <p id="notfound-title" class="font-['Cinzel_Decorative'] text-xl font-bold text-amber-300">Country not found</p>
+            <p id="notfound-text" class="mt-3 text-slate-200"></p>
+            <p id="notfound-hint" class="mt-2 hidden text-sm text-slate-300"></p>
+            <button id="notfound-btn" type="button"
+                class="mt-5 rounded-full border-2 border-amber-400 px-6 py-2 font-semibold text-amber-300 transition hover:bg-amber-400 hover:text-[#0a1633]">Try again</button>
+        </div>
+    </div>
+
     <!-- Page container (laptop width) -->
     <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col overflow-clip shadow-2xl shadow-black/60">
 

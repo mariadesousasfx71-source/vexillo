@@ -145,6 +145,32 @@ function showCountry(c) {
     updateHeart();
 }
 
+// Compare names ignoring capitals, accents and extra spaces
+function normalise(text) {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+// Not-found popup
+const notFound = document.querySelector("#notfound");
+
+function showNotFound(text, suggestions) {
+    document.querySelector("#notfound-text").textContent = `We couldn't find "${text}". Did you spell it properly?`;
+    const hint = document.querySelector("#notfound-hint");
+    hint.textContent = suggestions.length ? `Did you mean: ${suggestions.join(", ")}?` : "";
+    hint.classList.toggle("hidden", !suggestions.length);
+    notFound.classList.replace("hidden", "flex");
+    document.querySelector("#notfound-btn").focus();
+}
+
+function closeNotFound() {
+    notFound.classList.replace("flex", "hidden");
+    input.select();
+}
+
+document.querySelector("#notfound-btn").addEventListener("click", closeNotFound);
+notFound.addEventListener("click", (e) => { if (e.target === notFound) closeNotFound(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !notFound.classList.contains("hidden")) closeNotFound(); });
+
 // Show or hide the error line
 function showMessage(text) {
     message.textContent = text;
@@ -161,13 +187,16 @@ form.addEventListener("submit", async (event) => {
     setLoading(true);
     try {
         const results = await fetchCountries(text);
-        if (results.length === 0) {
-            showMessage(`No country found for "${text}"`);
+        // Full name check: the common or official name must match exactly
+        const wanted = normalise(text);
+        const exact = results.find((c) =>
+            normalise(c.names?.common ?? "") === wanted || normalise(c.names?.official ?? "") === wanted);
+        if (!exact) {
+            const suggestions = results.slice(0, 3).map((c) => c.names?.common).filter(Boolean);
+            showNotFound(text, suggestions);
             return;
         }
-        // Prefer an exact name match, e.g. "India" over "British Indian Ocean Territory"
-        const exact = results.find((c) => c.names?.common?.toLowerCase() === text.toLowerCase());
-        showCountry(exact ?? results[0]);
+        showCountry(exact);
         showResult();
         setSearchLocked(true); // locked until "New search" is clicked
         showMessage("");
