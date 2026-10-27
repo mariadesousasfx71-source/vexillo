@@ -41,7 +41,7 @@ function removeFavourite(code) {
 // ========== SEARCH (REST Countries API v5) ==========
 
 const API_KEY = "rc_live_a073c7927b3d45879926088dd0e18ba1"; // from restcountries.com -> API Keys
-const FIELDS = "names.common,names.official,flag.url_svg,flag.url_png,capitals,region,subregion,population,codes,borders";
+const FIELDS = "names.common,names.official,flag.url_svg,flag.url_png,capitals,region,subregion,population,codes,borders,area,currencies,languages,links";
 
 const form = document.querySelector("#search-form");
 const input = document.querySelector("#search-input");
@@ -140,12 +140,29 @@ function showCountry(c) {
     setText("country-region", c.region);
     setText("country-subregion", c.subregion);
     setText("country-population", c.population ? `${c.population.toLocaleString()} (${getSizeLabel(c.population)})` : "");
+    setText("country-area", c.area?.kilometers ? `${c.area.kilometers.toLocaleString()} km²` : "");
+    setText("country-currencies", c.currencies?.map((cur) => `${cur.name} (${cur.symbol})`).join(", "));
+    setText("country-languages", c.languages?.map((lang) => lang.name).join(", "));
     setText("country-codes", [c.codes?.alpha_2, c.codes?.alpha_3].filter(Boolean).join(" / "));
     setText("country-borders", c.borders?.length ? c.borders.join(", ") : "None (no land borders)");
 
     currentCountry = { code: c.codes?.alpha_3 ?? name, name, flag: flagUrl || "" };
     favBtn.classList.remove("hidden");
     updateHeart();
+}
+
+
+const mapCell = document.querySelector("#country-map");
+mapCell.replaceChildren();                 // clear the old link
+if (c.links?.google_maps) {
+    const a = document.createElement("a");
+    a.href = c.links.google_maps;
+    a.target = "_blank";                   // open in a new tab
+    a.textContent = "View on Google Maps";
+    a.className = "underline hover:text-amber-300";
+    mapCell.append(a);
+} else {
+    mapCell.textContent = "—";
 }
 
 // Compare names ignoring capitals, accents and extra spaces
