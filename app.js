@@ -50,6 +50,13 @@ const flagImg = document.querySelector("#flag-img");
 const flagPlaceholder = document.querySelector("#flag-placeholder");
 const favBtn = document.querySelector("#fav-btn");
 const result = document.querySelector("#result");
+const loader = document.querySelector("#loader");
+
+// Show or hide the spinning globe
+function setLoading(on) {
+    loader.classList.toggle("hidden", !on);
+    loader.classList.toggle("flex", on);
+}
 
 // Show the result boxes with a fade-in (first search only)
 function showResult() {
@@ -126,7 +133,8 @@ form.addEventListener("submit", async (event) => {
     const text = input.value.trim();
     if (!text) return;
 
-    showMessage("Searching...");
+    showMessage("");
+    setLoading(true);
     try {
         const results = await fetchCountries(text);
         if (results.length === 0) {
@@ -141,5 +149,7 @@ form.addEventListener("submit", async (event) => {
     } catch (error) {
         showMessage("Something went wrong. Please try again.");
         console.error(error);
+    } finally {
+        setLoading(false);
     }
 });
