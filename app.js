@@ -153,18 +153,16 @@ function normalise(text) {
 // Not-found popup
 const notFound = document.querySelector("#notfound");
 
-function showNotFound(text, suggestions) {
+function showNotFound(text) {
     document.querySelector("#notfound-text").textContent = `We couldn't find "${text}". Did you spell it properly?`;
-    const hint = document.querySelector("#notfound-hint");
-    hint.textContent = suggestions.length ? `Did you mean: ${suggestions.join(", ")}?` : "";
-    hint.classList.toggle("hidden", !suggestions.length);
     notFound.classList.replace("hidden", "flex");
     document.querySelector("#notfound-btn").focus();
 }
 
 function closeNotFound() {
     notFound.classList.replace("flex", "hidden");
-    input.select();
+    input.value = ""; // clear the wrong entry
+    input.focus();
 }
 
 document.querySelector("#notfound-btn").addEventListener("click", closeNotFound);
@@ -192,8 +190,7 @@ form.addEventListener("submit", async (event) => {
         const exact = results.find((c) =>
             normalise(c.names?.common ?? "") === wanted || normalise(c.names?.official ?? "") === wanted);
         if (!exact) {
-            const suggestions = results.slice(0, 3).map((c) => c.names?.common).filter(Boolean);
-            showNotFound(text, suggestions);
+            showNotFound(text);
             return;
         }
         showCountry(exact);
