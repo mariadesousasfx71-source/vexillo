@@ -19,8 +19,8 @@
 
 <body class="min-h-screen bg-white font-['Figtree'] text-slate-900">
     <!-- Background picture: covers the whole screen, stays still when scrolling,
-         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10) and is see-through (opacity-50 = 50% visible) -->
-    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-50"
+         keeps the landmarks in view (bg-bottom), sits behind everything (-z-10) and is see-through (opacity-75 = 75% visible) -->
+    <div class="fixed inset-0 -z-10 bg-[url('images/background.png')] bg-cover bg-bottom bg-no-repeat opacity-75"
         aria-hidden="true"></div>
 
     <!-- ========== HEADER + NAV BAR ========== -->
@@ -53,8 +53,59 @@
         </nav>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-10">
-        <!-- page content goes here -->
+    <!-- mx-auto max-w-5xl keeps everything in the centre of the screen -->
+    <main class="mx-auto max-w-5xl px-4 py-10">
+
+        <!-- ========== SEARCH ========== -->
+        <section id="search" class="mb-8">
+            <form id="search-form" class="mx-auto flex max-w-xl gap-3">
+                <input id="search-input" type="text" placeholder="Type a country, e.g. India" required
+                    class="flex-1 rounded-full border border-slate-300 bg-white px-5 py-3 shadow-sm outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-900/30">
+                <button type="submit"
+                    class="rounded-full bg-blue-900 px-6 py-3 font-semibold text-white shadow hover:bg-red-600">Search</button>
+            </form>
+            <!-- error message, e.g. "Country not found" (hidden until JavaScript shows it) -->
+            <p id="search-message" class="mt-3 hidden text-center font-semibold text-red-600"></p>
+        </section>
+
+        <!-- ========== RESULT: 2 boxes ==========
+             grid: 1 column on phones, 2 columns side by side from tablet size (md) -->
+        <section id="result" class="grid gap-6 md:grid-cols-2">
+
+            <!-- Box 1: the flag -->
+            <article class="flex items-center justify-center rounded-2xl bg-slate-100 p-6 shadow-lg">
+                <img id="flag-img" src="" alt="Flag of the searched country"
+                    class="hidden max-h-72 w-full rounded-lg object-contain shadow">
+                <p id="flag-placeholder" class="text-slate-500">The flag will appear here</p>
+            </article>
+
+            <!-- Box 2: details about the country -->
+            <article class="rounded-2xl bg-slate-100 p-6 shadow-lg">
+                <h3 id="country-name" class="mb-1 text-3xl font-bold text-blue-900">Country name</h3>
+                <p id="country-official" class="mb-5 text-slate-600">Official name</p>
+
+                <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
+                    <dt class="font-semibold">Capital</dt>
+                    <dd id="country-capital">—</dd>
+
+                    <dt class="font-semibold">Region</dt>
+                    <dd id="country-region">—</dd>
+
+                    <dt class="font-semibold">Subregion</dt>
+                    <dd id="country-subregion">—</dd>
+
+                    <dt class="font-semibold">Population</dt>
+                    <dd id="country-population">—</dd>
+
+                    <dt class="font-semibold">Codes</dt>
+                    <dd id="country-codes">—</dd>
+
+                    <dt class="font-semibold">Borders</dt>
+                    <dd id="country-borders">—</dd>
+                </dl>
+            </article>
+
+        </section>
     </main>
 
     <script src="data.js"></script>
