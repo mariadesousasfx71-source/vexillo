@@ -27,9 +27,9 @@
          so it peeks in from the right edge without its hook.
          right-0 = touches the right edge; top-1/2 -translate-y-1/2 = vertical centre.
          -z-[5] = in front of the watermark but behind the boxes. Only on wide screens (hidden xl:block).
-         opacity-50 = the compass is half see-through. -->
+         opacity-40 = 40% visible; drop-shadow-[...] = a dark shadow down and to the left of the compass. -->
     <img src="images/compass-half.gif" alt="" aria-hidden="true"
-        class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[224px] -translate-y-1/2 opacity-50 drop-shadow-2xl xl:block 2xl:w-[288px]">
+        class="pointer-events-none fixed right-0 top-1/2 -z-[5] hidden w-[224px] -translate-y-1/2 opacity-40 drop-shadow-[-14px_14px_18px_rgba(0,0,0,0.9)] xl:block 2xl:w-[288px]">
 
     <!-- ========== HEADER + NAV BAR ========== -->
     <!-- sticky: stays at the top when scrolling. bg-blue-950 = solid navy blue (no transparency),
@@ -45,7 +45,7 @@
                 <h1 class="font-['Cinzel_Decorative'] text-4xl font-black tracking-wide text-white md:text-5xl">
                     Vexillo
                 </h1>
-                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-400 md:text-3xl">
+                <h2 class="font-['Dancing_Script'] text-2xl font-bold text-red-600 md:text-3xl">
                     Every flag tells a story
                 </h2>
                 </div>
@@ -83,36 +83,39 @@
              mt-16 = extra space above the boxes -->
         <section id="result" class="mt-16 grid gap-6 md:grid-cols-2">
 
+            <!-- Sailor-uniform style boxes: dark navy fill (bg-[#0a1633]) with a gold border (border-amber-400)
+                 and a thin inner gold line like uniform piping (outline + -outline-offset-8). -->
+
             <!-- Box 1: the flag -->
-            <article class="flex items-center justify-center rounded-2xl bg-slate-100 p-6 shadow-lg">
+            <article class="flex items-center justify-center rounded-2xl p-8 border-2 border-amber-400 bg-[#0a1633] shadow-xl shadow-black/50 outline-1 outline-amber-400/40 -outline-offset-8">
                 <img id="flag-img" src="" alt="Flag of the searched country"
                     class="hidden max-h-72 w-full rounded-lg object-contain shadow">
-                <p id="flag-placeholder" class="text-slate-500">The flag will appear here</p>
+                <p id="flag-placeholder" class="text-slate-300">The flag will appear here</p>
             </article>
 
             <!-- Box 2: details about the country -->
-            <article class="rounded-2xl bg-slate-100 p-6 shadow-lg">
+            <article class="rounded-2xl p-8 text-white border-2 border-amber-400 bg-[#0a1633] shadow-xl shadow-black/50 outline-1 outline-amber-400/40 -outline-offset-8">
                 <!-- uppercase: shows the name in CAPITAL letters, whatever the API sends -->
-                <h3 id="country-name" class="mb-1 text-3xl font-bold uppercase tracking-wide text-blue-900">Country name</h3>
-                <p id="country-official" class="mb-5 text-slate-600">Official name</p>
+                <h3 id="country-name" class="mb-1 text-3xl font-bold uppercase tracking-wide text-amber-300">Country name</h3>
+                <p id="country-official" class="mb-5 text-slate-300">Official name</p>
 
                 <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
-                    <dt class="font-semibold">Capital</dt>
+                    <dt class="font-semibold text-amber-300">Capital</dt>
                     <dd id="country-capital">—</dd>
 
-                    <dt class="font-semibold">Region</dt>
+                    <dt class="font-semibold text-amber-300">Region</dt>
                     <dd id="country-region">—</dd>
 
-                    <dt class="font-semibold">Subregion</dt>
+                    <dt class="font-semibold text-amber-300">Subregion</dt>
                     <dd id="country-subregion">—</dd>
 
-                    <dt class="font-semibold">Population</dt>
+                    <dt class="font-semibold text-amber-300">Population</dt>
                     <dd id="country-population">—</dd>
 
-                    <dt class="font-semibold">Codes</dt>
+                    <dt class="font-semibold text-amber-300">Codes</dt>
                     <dd id="country-codes">—</dd>
 
-                    <dt class="font-semibold">Borders</dt>
+                    <dt class="font-semibold text-amber-300">Borders</dt>
                     <dd id="country-borders">—</dd>
                 </dl>
             </article>
