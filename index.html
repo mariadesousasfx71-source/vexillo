@@ -36,15 +36,23 @@
 
     <!-- About popup (opens from the About menu link) -->
     <div id="about" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60 px-4" role="dialog" aria-labelledby="about-title">
-        <div class="relative w-full max-w-xl rounded-2xl border-2 border-amber-400 bg-[#0a1633] px-4 py-6 text-center text-white shadow-2xl outline-1 outline-amber-400/40 -outline-offset-8 sm:px-5">
+        <div class="relative w-full max-w-3xl rounded-2xl border-2 border-amber-400 bg-[#0a1633] px-4 py-6 text-center text-white shadow-2xl outline-1 outline-amber-400/40 -outline-offset-8 sm:px-8">
             <button id="about-close" type="button" aria-label="Close" class="absolute right-4 top-3 text-2xl leading-none text-amber-300 hover:text-white">&times;</button>
             <h2 id="about-title" class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">About Vexillo</h2>
             <p class="mx-auto mt-4 max-w-2xl text-slate-200 sm:text-lg">
                 <em>Vexillo</em> comes from the Latin <strong class="text-amber-200">vexillum</strong>, the cloth banner carried by Roman soldiers,
-                and the root of <strong class="text-amber-200">vexillology</strong>, the study of flags.<br><br>
+                and the root of <strong class="text-amber-200">vexillology</strong>, the study of flags.
                 Every flag is a small story of a nation: its history, its hopes and its people.
-                Vexillo lets you search any country, see its flag, and discover the facts behind it.
             </p>
+            <!-- What you can do -->
+            <ul class="mx-auto mt-4 w-fit space-y-1.5 text-left text-sm text-slate-200 sm:text-base md:whitespace-nowrap">
+                <li><span class="text-amber-300">&#10022;</span> <strong class="text-amber-200">Search</strong> any country, with name suggestions as you type</li>
+                <li><span class="text-amber-300">&#10022;</span> <strong class="text-amber-200">Details:</strong> capital, population, area, currencies, languages and a map</li>
+                <li><span class="text-amber-300">&#10022;</span> <strong class="text-amber-200">Border chips</strong> to jump to a neighbouring country</li>
+                <li><span class="text-amber-300">&#10022;</span> <strong class="text-amber-200">All Flags</strong> and <strong class="text-amber-200">Regions</strong>, sorted by name, population or area</li>
+                <li><span class="text-amber-300">&#10022;</span> <strong class="text-amber-200">Favourites</strong> saved in your browser, and a side-by-side <strong class="text-amber-200">compare</strong></li>
+            </ul>
+            <p class="mt-4 text-xs text-slate-400">Country data: REST Countries API</p>
         </div>
     </div>
 
@@ -150,6 +158,8 @@
                     </svg>
                 </button>
 
+                <!-- Details (hidden while the map is showing) -->
+                <div id="details-content">
                 <h3 id="country-name" class="mb-1 break-words pr-12 text-2xl font-bold uppercase sm:text-3xl tracking-wide text-amber-300">Country name</h3>
                 <p id="country-official" class="mb-5 text-slate-300">Official name</p>
 
@@ -184,6 +194,18 @@
                     <dt class="font-semibold text-amber-300">Map</dt>
                     <dd id="country-map">—</dd>
                 </dl>
+                </div>
+
+                <!-- Map (replaces the details until it is closed) -->
+                <div id="map-panel" class="hidden h-full flex-col gap-3">
+                    <iframe id="map-frame" title="Map of the country" loading="lazy"
+                        class="min-h-72 w-full flex-1 rounded-lg border border-amber-400/60"></iframe>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <a id="map-external" href="#" target="_blank" class="text-sm underline hover:text-amber-300">Open in Google Maps</a>
+                        <button id="map-close" type="button"
+                            class="rounded-full border-2 border-amber-400 px-5 py-1.5 font-semibold text-amber-300 transition hover:bg-amber-400 hover:text-[#0a1633]">Close map</button>
+                    </div>
+                </div>
             </article>
 
             <!-- New search: clears the result, unlocks the search box (right, below the details) -->
@@ -203,6 +225,16 @@
         <!-- Title bar: stays fixed under the nav bar while the flags scroll -->
         <div id="flags-title" class="view-title sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
             <h2 class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">Flags of the World</h2>
+            <!-- Sort -->
+            <label class="mt-3 inline-flex items-center gap-2 text-sm text-slate-200">Sort by
+                <select id="flags-sort" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="name">Name (A&ndash;Z)</option>
+                    <option value="pop-desc">Population (high &rarr; low)</option>
+                    <option value="pop-asc">Population (low &rarr; high)</option>
+                    <option value="area-desc">Area (large &rarr; small)</option>
+                    <option value="area-asc">Area (small &rarr; large)</option>
+                </select>
+            </label>
         </div>
 
         <!-- Loading -->
@@ -228,6 +260,16 @@
                     class="shrink-0 rounded-full bg-blue-900 px-5 py-2 font-semibold text-white shadow hover:bg-red-600">Show</button>
             </form>
             <p class="mt-2 text-xs text-slate-300">Africa &middot; Americas &middot; Antarctic &middot; Asia &middot; Europe &middot; Oceania</p>
+            <!-- Sort -->
+            <label class="mt-3 inline-flex items-center gap-2 text-sm text-slate-200">Sort by
+                <select id="regions-sort" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="name">Name (A&ndash;Z)</option>
+                    <option value="pop-desc">Population (high &rarr; low)</option>
+                    <option value="pop-asc">Population (low &rarr; high)</option>
+                    <option value="area-desc">Area (large &rarr; small)</option>
+                    <option value="area-asc">Area (small &rarr; large)</option>
+                </select>
+            </label>
             <p id="regions-error" class="mt-2 hidden text-sm font-semibold text-red-300"></p>
         </div>
 
@@ -245,6 +287,28 @@
     <section id="favourites" class="mx-auto hidden w-full max-w-5xl flex-1 px-4 pb-8 sm:px-6">
         <div class="view-title sticky top-0 z-[5] -mx-4 mb-6 border-b-2 border-amber-400 bg-[#0a1633]/90 py-3 text-center shadow-lg shadow-black/40 backdrop-blur-sm sm:-mx-6">
             <h2 class="font-['Cinzel_Decorative'] text-2xl font-bold text-amber-300 sm:text-3xl">My Favourites</h2>
+            <!-- Compare: choose 2 favourites -->
+            <form id="compare-form" class="mt-3 hidden flex-wrap items-center justify-center gap-2 px-4 text-sm">
+                <select id="compare-a" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-amber-400"></select>
+                <span class="font-semibold text-amber-300">vs</span>
+                <select id="compare-b" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-amber-400"></select>
+                <button type="submit" class="rounded-full bg-blue-900 px-5 py-1.5 font-semibold text-white shadow hover:bg-red-600">Compare</button>
+            </form>
+            <p id="compare-hint" class="mt-2 hidden text-xs text-slate-300">Mark at least 2 favourites to compare them.</p>
+        </div>
+
+        <!-- Compare result: 2 favourites side by side -->
+        <div id="compare-loader" class="hidden flex-col items-center gap-2 py-6 text-amber-300">
+            <img src="images/globe-loader.svg" alt="" class="h-16 w-16 drop-shadow-lg">
+            <p class="text-sm font-semibold">Loading...</p>
+        </div>
+        <p id="compare-error" class="mb-4 hidden text-center font-semibold text-red-300"></p>
+        <div id="compare-view" class="mb-8 hidden scroll-mt-72">
+            <div id="compare-grid" class="grid gap-6 md:grid-cols-2"></div>
+            <div class="mt-4 flex justify-end">
+                <button id="compare-close" type="button"
+                    class="rounded-full border-2 border-amber-400 bg-[#0a1633] px-6 py-2 font-semibold text-amber-300 shadow-lg shadow-black/40 transition hover:bg-amber-400 hover:text-[#0a1633]">Close comparison</button>
+            </div>
         </div>
 
         <!-- Loading -->

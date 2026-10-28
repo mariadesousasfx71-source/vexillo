@@ -118,6 +118,58 @@ async function fetchCountries(text) {
     return json.data?.objects ?? [];
 }
 
+// Map inside the details box: show it instead of the details, and back again
+const detailsContent = document.querySelector("#details-content");
+const mapPanel = document.querySelector("#map-panel");
+const mapFrame = document.querySelector("#map-frame");
+
+function showMap(name, googleLink) {
+    mapFrame.src = `https://maps.google.com/maps?q=${encodeURIComponent(name)}&z=4&output=embed`;
+    const external = document.querySelector("#map-external");
+    external.href = googleLink || `https://www.google.com/maps/search/${encodeURIComponent(name)}`;
+    detailsContent.classList.add("hidden");
+    favBtn.classList.add("invisible"); // keep the heart out of the way of the map
+    mapPanel.classList.replace("hidden", "flex");
+}
+
+function hideMap() {
+    mapPanel.classList.replace("flex", "hidden");
+    detailsContent.classList.remove("hidden");
+    favBtn.classList.remove("invisible");
+}
+
+document.querySelector("#map-close").addEventListener("click", hideMap);
+
+// Border countries as clickable chips (click -> that country's details)
+const bordersCell = document.querySelector("#country-borders");
+
+function showBorderChips(codes) {
+    if (codes.length === 0) {
+        bordersCell.textContent = "None (no land borders)";
+        return;
+    }
+    // Show the country name if the full list is loaded, otherwise the 3-letter code
+    const nameOf = (code) => allCountries?.find((c) => c.codes?.alpha_3 === code)?.names?.common ?? code;
+    const chips = codes.map((code) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.dataset.code = code;
+        chip.textContent = nameOf(code);
+        chip.className = "rounded-full border border-amber-400/70 px-3 py-0.5 text-sm text-amber-200 transition hover:bg-amber-400 hover:text-[#0a1633]";
+        return chip;
+    });
+    const wrap = document.createElement("div");
+    wrap.className = "flex flex-wrap gap-2";
+    wrap.append(...chips);
+    bordersCell.replaceChildren(wrap);
+}
+
+// Event delegation: ONE listener on the borders cell handles every chip
+bordersCell.addEventListener("click", (event) => {
+    const chip = event.target.closest("button[data-code]");
+    if (chip) openDetails(chip.dataset.code);
+});
+
 // Put text into an element by id
 function setText(id, value) {
     document.querySelector(`#${id}`).textContent = value || "—";
@@ -144,21 +196,18 @@ function showCountry(c) {
     setText("country-currencies", c.currencies?.map((cur) => `${cur.name} (${cur.symbol})`).join(", "));
     setText("country-languages", c.languages?.map((lang) => lang.name).join(", "));
     setText("country-codes", [c.codes?.alpha_2, c.codes?.alpha_3].filter(Boolean).join(" / "));
-    setText("country-borders", c.borders?.length ? c.borders.join(", ") : "None (no land borders)");
+    showBorderChips(c.borders ?? []);
 
-    // Map: a clickable Google Maps link
+    // Map: a button that shows the map inside the details box
     const mapCell = document.querySelector("#country-map");
-    mapCell.replaceChildren(); // clear the old link
-    if (c.links?.google_maps) {
-        const a = document.createElement("a");
-        a.href = c.links.google_maps;
-        a.target = "_blank"; // open in a new tab
-        a.textContent = "View on Google Maps";
-        a.className = "underline hover:text-amber-300";
-        mapCell.append(a);
-    } else {
-        mapCell.textContent = "—";
-    }
+    mapCell.replaceChildren(); // clear the old button
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Show map";
+    btn.className = "underline hover:text-amber-300";
+    btn.addEventListener("click", () => showMap(name, c.links?.google_maps));
+    mapCell.append(btn);
+    hideMap(); // a new country always starts on its details
 
     currentCountry = { code: c.codes?.alpha_3 ?? name, name, flag: flagUrl || "" };
     favBtn.classList.remove("hidden");
@@ -227,17 +276,61 @@ form.addEventListener("submit", async (event) => {
     }
 });
 
-// Splash screen: fade out once everything has loaded (shown at least 1.2 seconds)
-const splash = document.querySelector("#splash");
-const splashStart = Date.now();
+// Fetch ONE country by its 3-letter code, e.g. "IND"
+async function fetchCountryByCode(code) {
+    const url = `https://api.restcountries.com/countries/v5/codes.alpha_3/${encodeURIComponent(code)}?response_fields=${FIELDS}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const json = await res.json();
+    return json.data?.objects?.[0] ?? null;
+}
 
-window.addEventListener("load", () => {
-    const wait = Math.max(0, 1200 - (Date.now() - splashStart));
-    setTimeout(() => {
-        splash.classList.add("opacity-0", "pointer-events-none");
-        setTimeout(() => splash.remove(), 700);
-    }, wait);
-});
+// Detail view: show a country (by code) in the two result boxes on the home page
+let detailsId = 0;
+
+async function openDetails(code) {
+    if (!code) return;
+    const myId = ++detailsId;
+    showView("home");
+    hideResult();
+    hideSuggestions();
+    showMessage("");
+    setLoading(true);
+    try {
+        const country = await fetchCountryByCode(code);
+        if (myId !== detailsId) return; // a newer click has started
+        if (!country) {
+            showMessage("Details not found for this country.");
+            return;
+        }
+        input.value = country.names?.common ?? "";
+        showCountry(country);
+        showResult();
+        setSearchLocked(true); // same as after a search: use "New search" to search again
+    } catch (error) {
+        showMessage("Could not load the details. Please try again.");
+        console.error(error);
+    } finally {
+        setLoading(false);
+    }
+}
+
+// Splash screen: stays until the page AND the country list have loaded (at least 1.2 seconds),
+// so the search box is ready with instant suggestions when it fades out
+const splash = document.querySelector("#splash");
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const pageLoaded = new Promise((resolve) => window.addEventListener("load", resolve));
+
+async function closeSplash() {
+    const countries = loadAllCountries().catch((error) => console.error(error)); // a failure must not block the page
+    const giveUp = sleep(15000); // never wait longer than 15 seconds (e.g. when offline)
+    await Promise.all([pageLoaded, sleep(1200), Promise.race([countries, giveUp])]);
+    splash.classList.add("opacity-0", "pointer-events-none");
+    await sleep(700);
+    splash.remove();
+}
+
+// (closeSplash() is called at the very end of this file, after everything is set up)
 
 // About popup: opens only when "About" in the menu is clicked
 const about = document.querySelector("#about");
@@ -313,11 +406,8 @@ input.addEventListener("input", () => {
     debounceTimer = setTimeout(() => showSuggestions(text), wait); // only after a short pause in typing
 });
 
-// Load the country list in the background once the page has loaded,
-// so suggestions (and All Flags) can then appear instantly
-window.addEventListener("load", () => {
-    loadAllCountries().catch((error) => console.error(error));
-});
+// The country list is loaded while the splash screen shows (see the splash code at the end),
+// so suggestions and All Flags are instant once the page opens
 
 // Event delegation: ONE listener on the list handles a click on any suggestion
 suggestions.addEventListener("click", (event) => {
@@ -363,7 +453,7 @@ function showView(name) {
 
 // Fetch every country, 100 at a time (the free plan's maximum page size)
 async function fetchAllCountries() {
-    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg,population";
+    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg,population,area";
     const list = [];
     let offset = 0;
     let more = true;
@@ -395,13 +485,29 @@ async function loadAllCountries(loader) {
     }
 }
 
-// One small card: flag, name, capital
+// Sort a COPY of the list (the original order stays untouched)
+function sortCountries(list, mode) {
+    const copy = [...list];
+    const byName = (a, b) => (a.names?.common ?? "").localeCompare(b.names?.common ?? "");
+    const pop = (c) => c.population ?? 0;
+    const area = (c) => c.area?.kilometers ?? 0;
+    if (mode === "pop-desc") return copy.sort((a, b) => pop(b) - pop(a));
+    if (mode === "pop-asc") return copy.sort((a, b) => pop(a) - pop(b));
+    if (mode === "area-desc") return copy.sort((a, b) => area(b) - area(a));
+    if (mode === "area-asc") return copy.sort((a, b) => area(a) - area(b));
+    return copy.sort(byName);
+}
+
+// One small card: flag, name, population, area, capital
 function flagCard(c) {
     const name = c.names?.common ?? "Unknown";
     const capital = c.capitals?.map((cap) => cap.name).join(", ") || "No capital";
     const population = c.population ? c.population.toLocaleString() : "Unknown";
+    const area = c.area?.kilometers ? `${c.area.kilometers.toLocaleString()} km²` : "Unknown";
     const li = document.createElement("li");
-    li.className = "flex flex-col overflow-hidden rounded-xl border border-amber-400/70 bg-[#0a1633] text-center shadow-lg shadow-black/40 transition hover:-translate-y-1 hover:border-amber-300";
+    li.className = "flex cursor-pointer flex-col overflow-hidden rounded-xl border border-amber-400/70 bg-[#0a1633] text-center shadow-lg shadow-black/40 transition hover:-translate-y-1 hover:border-amber-300";
+    li.dataset.code = c.codes?.alpha_3 ?? ""; // used to open this country's details
+    li.title = "Click for details";
     const flagUrl = c.flag?.url_png || c.flag?.url_svg; // a few disputed regions have no flag in the API
     const flagHtml = flagUrl
         ? `<img src="${flagUrl}" alt="Flag of ${name}" loading="lazy" class="aspect-[3/2] w-full bg-slate-800 object-cover">`
@@ -412,16 +518,28 @@ function flagCard(c) {
         <p class="text-sm font-bold uppercase leading-tight text-amber-300"></p>
         <p class="mt-1 text-xs leading-tight text-slate-300"></p>
         <p class="mt-1 text-xs leading-tight text-slate-300"></p>
+        <p class="mt-1 text-xs leading-tight text-slate-300"></p>
     </div>`;
     li.querySelectorAll("p")[0].textContent = name;
     li.querySelectorAll("p")[1].textContent = `Population: ${population}`;
-    li.querySelectorAll("p")[2].textContent = capital;
+    li.querySelectorAll("p")[2].textContent = `Area: ${area}`;
+    li.querySelectorAll("p")[3].textContent = capital;
     return li;
 }
 
 // All Flags page
 const flagsGrid = document.querySelector("#flags-grid");
 const flagsError = document.querySelector("#flags-error");
+
+const flagsSort = document.querySelector("#flags-sort");
+
+function renderAllFlags() {
+    flagsGrid.replaceChildren(...sortCountries(allCountries, flagsSort.value).map(flagCard));
+}
+
+flagsSort.addEventListener("change", () => {
+    if (allCountries) renderAllFlags();
+});
 
 async function showAllFlags(event) {
     event.preventDefault();
@@ -430,8 +548,8 @@ async function showAllFlags(event) {
 
     flagsError.classList.add("hidden");
     try {
-        const list = await loadAllCountries(document.querySelector("#flags-loader"));
-        flagsGrid.replaceChildren(...list.map(flagCard));
+        await loadAllCountries(document.querySelector("#flags-loader"));
+        renderAllFlags();
     } catch (error) {
         flagsError.textContent = "Could not load the flags. Please try again.";
         flagsError.classList.remove("hidden");
@@ -453,6 +571,14 @@ function showRegions(event) {
 }
 
 let regionSearchId = 0;
+let regionList = []; // the countries of the region being shown
+const regionsSort = document.querySelector("#regions-sort");
+
+function renderRegion() {
+    regionsGrid.replaceChildren(...sortCountries(regionList, regionsSort.value).map(flagCard));
+}
+
+regionsSort.addEventListener("change", renderRegion);
 
 regionForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -475,7 +601,8 @@ regionForm.addEventListener("submit", async (event) => {
             return;
         }
         regionsHeading.textContent = `Flags of ${inRegion[0].region}`;
-        regionsGrid.replaceChildren(...inRegion.map(flagCard));
+        regionList = inRegion;
+        renderRegion();
     } catch (error) {
         regionsError.textContent = "Could not load the flags. Please try again.";
         regionsError.classList.remove("hidden");
@@ -494,6 +621,8 @@ async function showFavourites(event) {
     favGrid.replaceChildren();
     favError.classList.add("hidden");
     favEmpty.classList.toggle("hidden", favourites.length > 0);
+    closeCompare();
+    fillCompareSelects();
     if (favourites.length === 0) return;
 
     try {
@@ -537,7 +666,113 @@ favGrid.addEventListener("click", (event) => {
     btn.closest("li").remove();
     if (currentCountry?.code === code) updateHeart(); // keep the search page heart in step
     favEmpty.classList.toggle("hidden", favourites.length > 0);
+    fillCompareSelects(); // the removed country can no longer be compared
 });
+
+// ========== COMPARE 2 FAVOURITES ==========
+
+const compareForm = document.querySelector("#compare-form");
+const compareA = document.querySelector("#compare-a");
+const compareB = document.querySelector("#compare-b");
+const compareView = document.querySelector("#compare-view");
+const compareGrid = document.querySelector("#compare-grid");
+const compareError = document.querySelector("#compare-error");
+
+// Fill both dropdowns with the favourites (needs at least 2)
+function fillCompareSelects() {
+    const enough = favourites.length >= 2;
+    compareForm.classList.toggle("hidden", !enough);
+    compareForm.classList.toggle("flex", enough);
+    document.querySelector("#compare-hint").classList.toggle("hidden", enough || favourites.length === 0);
+    const options = [...favourites]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((f) => `<option value="${f.code}">${f.name}</option>`)
+        .join("");
+    compareA.innerHTML = options;
+    compareB.innerHTML = options;
+    if (enough) compareB.selectedIndex = 1; // start with two different countries
+}
+
+// One side of the comparison. "other" is used to mark the bigger population/area with a ▲
+function compareCard(c, other) {
+    const card = document.createElement("article");
+    card.className = "rounded-2xl border-2 border-amber-400 bg-[#0a1633] p-5 text-white shadow-xl shadow-black/50 outline-1 outline-amber-400/40 -outline-offset-8 sm:p-6";
+    const flagUrl = c.flag?.url_svg || c.flag?.url_png;
+    const bigger = (a, b) => (a ?? 0) > (b ?? 0) ? " ▲" : "";
+    const rows = [
+        ["Capital", c.capitals?.map((cap) => cap.name).join(", ")],
+        ["Region", c.region],
+        ["Population", c.population ? c.population.toLocaleString() + bigger(c.population, other.population) : ""],
+        ["Area", c.area?.kilometers ? `${c.area.kilometers.toLocaleString()} km²${bigger(c.area.kilometers, other.area?.kilometers)}` : ""],
+        ["Currencies", c.currencies?.map((cur) => `${cur.name} (${cur.symbol})`).join(", ")],
+        ["Languages", c.languages?.map((lang) => lang.name).join(", ")],
+    ];
+    card.innerHTML = `
+        <img alt="" class="mb-4 aspect-[3/2] w-full rounded-lg bg-slate-800 object-contain shadow">
+        <h3 class="mb-4 break-words text-2xl font-bold uppercase tracking-wide text-amber-300"></h3>
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 break-words"></dl>`;
+    const img = card.querySelector("img");
+    if (flagUrl) img.src = flagUrl; else img.classList.add("hidden");
+    img.alt = `Flag of ${c.names?.common ?? ""}`;
+    card.querySelector("h3").textContent = c.names?.common ?? "Unknown";
+    const dl = card.querySelector("dl");
+    for (const [label, value] of rows) {
+        const dt = document.createElement("dt");
+        dt.className = "font-semibold text-amber-300";
+        dt.textContent = label;
+        const dd = document.createElement("dd");
+        dd.textContent = value || "—";
+        dl.append(dt, dd);
+    }
+    return card;
+}
+
+function closeCompare() {
+    compareView.classList.add("hidden");
+    compareError.classList.add("hidden");
+    compareGrid.replaceChildren();
+}
+
+let compareId = 0;
+
+compareForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const myId = ++compareId;
+    closeCompare();
+    if (compareA.value === compareB.value) {
+        compareError.textContent = "Please choose two different countries.";
+        compareError.classList.remove("hidden");
+        return;
+    }
+    const loader = document.querySelector("#compare-loader");
+    loader.classList.replace("hidden", "flex");
+    try {
+        // Fetch both countries at the same time (in parallel) and wait for both
+        const [a, b] = await Promise.all([fetchCountryByCode(compareA.value), fetchCountryByCode(compareB.value)]);
+        if (myId !== compareId) return; // a newer comparison has started
+        if (!a || !b) throw new Error("Country not found");
+        compareGrid.replaceChildren(compareCard(a, b), compareCard(b, a));
+        compareView.classList.remove("hidden");
+        compareView.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+        compareError.textContent = "Could not load the comparison. Please try again.";
+        compareError.classList.remove("hidden");
+        console.error(error);
+    } finally {
+        loader.classList.replace("flex", "hidden");
+    }
+});
+
+document.querySelector("#compare-close").addEventListener("click", closeCompare);
+
+// Event delegation: ONE click listener per grid opens the details of any clicked card
+for (const grid of [flagsGrid, regionsGrid, favGrid]) {
+    grid.addEventListener("click", (event) => {
+        if (event.target.closest("button")) return; // the heart button has its own job
+        const card = event.target.closest("li[data-code]");
+        if (card) openDetails(card.dataset.code);
+    });
+}
 
 function showHome(event) {
     event.preventDefault();
@@ -561,3 +796,6 @@ function placeTitleBars() {
 
 placeTitleBars();
 window.addEventListener("resize", placeTitleBars);
+
+// Start: close the splash screen once the page and the country list are ready
+closeSplash();
