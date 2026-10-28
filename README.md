@@ -9,30 +9,9 @@
 A world explorer for flags and country facts.<br>
 Search any country, browse every flag, filter by region, save favourites and compare two countries side by side.
 
-[![Live demo](https://img.shields.io/badge/Live%20demo-vexillo--sigma.vercel.app-0a1633?style=for-the-badge&logo=vercel&logoColor=white)](https://vexillo-sigma.vercel.app)
-
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%20v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![JavaScript](https://img.shields.io/badge/Vanilla%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![REST Countries API](https://img.shields.io/badge/REST%20Countries%20API-v5-f59e0b?style=flat-square)
-![Vercel](https://img.shields.io/badge/Hosted%20on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
-
 <img src="images/screenshots/home.jpg" alt="Vexillo home page" width="85%">
 
 </div>
-
----
-
-## Contents
-
-- [About](#about)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [How It Works](#how-it-works)
-- [JavaScript Concepts Used](#javascript-concepts-used)
-- [Project Structure](#project-structure)
-- [How to Run Locally](#how-to-run-locally)
-- [Author](#author)
 
 ---
 
@@ -88,38 +67,6 @@ Everything runs in the browser. `index.html` holds the page and its four views (
 - The full country list is loaded **once** (100 per request, the free plan's limit) while the splash screen shows, then reused by every view.
 - `response_fields` asks the API only for the fields the app needs.
 - Favourites are saved in `localStorage` as JSON.
-
----
-
-## JavaScript Concepts Used
-
-| Concept | Where |
-| --- | --- |
-| `fetch` + `async` / `await`, with a `res.ok` check | Every API request |
-| `try` / `catch` / `finally` | Friendly errors, loaders always hidden |
-| **Event delegation** | One listener for suggestions, border chips, flag grids and hearts |
-| **Debouncing** (`setTimeout` / `clearTimeout`) | Suggestions while typing |
-| `Promise.all` and `Promise.race` | Compare (two countries at once), splash screen limit of 15 s |
-| Request ids | A slow old answer never replaces a newer one |
-| `localStorage` + `JSON.stringify` / `JSON.parse` | Favourites |
-| Optional chaining `?.` and `??` | Missing data never crashes the page |
-| Array methods: `map`, `filter`, `find`, `some`, `sort`, `slice` | Suggestions, sorting, regions |
-
----
-
-## Project Structure
-
-```
-vexillo/
-├── index.html              page: header, 4 views, popups, footer
-├── app.js                  all the JavaScript
-└── images/
-    ├── background.png      beach background
-    ├── compass-logo.png    logo
-    ├── compass-half.gif    animated compass (wide screens)
-    ├── globe-loader.svg    spinning globe loader
-    └── screenshots/        images used in this README
-```
 
 ---
 
