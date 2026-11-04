@@ -109,12 +109,29 @@ favBtn.addEventListener("click", () => {
     updateHeart();
 });
 
+// Ask the API for something. One helper, so every request fails with a clear message.
+// The free plan allows only 500 requests a month, so the app asks for the full list ONCE
+// (see fetchAllCountries below) and then reuses it. These calls are only a back-up.
+async function apiGet(url) {
+    // Give up after 10 seconds, so a blocked or very slow connection shows a message instead of a spinner that never stops
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) {
+        const error = new Error(`Request failed (${res.status})`);
+        error.status = res.status; // 401/403 = key refused or quota used up, 429 = too many requests
+        throw error;
+    }
+    return res.json();
+}
+
 // Fetch countries whose name matches the text
 async function fetchCountries(text) {
-    const url = `https://api.restcountries.com/countries/v5/name?q=${encodeURIComponent(text)}&response_fields=${FIELDS}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
-    if (!res.ok) throw new Error(`Request failed (${res.status})`);
-    const json = await res.json();
+    // The full list is already in memory: search it, no API request needed
+    if (allCountries) {
+        const wanted = normalise(text);
+        return allCountries.filter((c) =>
+            normalise(c.names?.common ?? "").includes(wanted) || normalise(c.names?.official ?? "").includes(wanted));
+    }
+    const json = await apiGet(`https://api.restcountries.com/countries/v5/name?q=${encodeURIComponent(text)}&response_fields=${FIELDS}`);
     return json.data?.objects ?? [];
 }
 
@@ -269,7 +286,7 @@ form.addEventListener("submit", async (event) => {
         setSearchLocked(true); // locked until "New search" is clicked
         showMessage("");
     } catch (error) {
-        showMessage("Something went wrong. Please try again.");
+        showMessage(`Something went wrong${errorNote(error)}. Please try again.`);
         console.error(error);
     } finally {
         setLoading(false);
@@ -278,10 +295,10 @@ form.addEventListener("submit", async (event) => {
 
 // Fetch ONE country by its 3-letter code, e.g. "IND"
 async function fetchCountryByCode(code) {
-    const url = `https://api.restcountries.com/countries/v5/codes.alpha_3/${encodeURIComponent(code)}?response_fields=${FIELDS}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
-    if (!res.ok) throw new Error(`Request failed (${res.status})`);
-    const json = await res.json();
+    // The full list already has every detail: no API request needed
+    const saved = allCountries?.find((c) => c.codes?.alpha_3 === code);
+    if (saved) return saved;
+    const json = await apiGet(`https://api.restcountries.com/countries/v5/codes.alpha_3/${encodeURIComponent(code)}?response_fields=${FIELDS}`);
     return json.data?.objects?.[0] ?? null;
 }
 
@@ -308,7 +325,7 @@ async function openDetails(code) {
         showResult();
         setSearchLocked(true); // same as after a search: use "New search" to search again
     } catch (error) {
-        showMessage("Could not load the details. Please try again.");
+        showMessage(`Could not load the details${errorNote(error)}. Please try again.`);
         console.error(error);
     } finally {
         setLoading(false);
@@ -321,13 +338,25 @@ const splash = document.querySelector("#splash");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const pageLoaded = new Promise((resolve) => window.addEventListener("load", resolve));
 
+// " (error 403)" for a failed API request, or nothing; added to the error messages below
+function errorNote(error) {
+    if (error?.name === "TimeoutError") return " (no answer from the data service)";
+    return error?.status ? ` (error ${error.status})` : "";
+}
+
 async function closeSplash() {
-    const countries = loadAllCountries().catch((error) => console.error(error)); // a failure must not block the page
+    let loadError = null;
+    const countries = loadAllCountries().catch((error) => { // a failure must not block the page
+        loadError = error;
+        console.error(error);
+    });
     const giveUp = sleep(15000); // never wait longer than 15 seconds (e.g. when offline)
     await Promise.all([pageLoaded, sleep(1200), Promise.race([countries, giveUp])]);
     splash.classList.add("opacity-0", "pointer-events-none");
     await sleep(700);
     splash.remove();
+    // Tell the visitor, instead of leaving a page that quietly does not work
+    if (loadError) showMessage(`Could not load the country data${errorNote(loadError)}. Please try again in a little while.`);
 }
 
 // (closeSplash() is called at the very end of this file, after everything is set up)
@@ -451,22 +480,55 @@ function showView(name) {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Fetch every country, 100 at a time (the free plan's maximum page size)
-async function fetchAllCountries() {
-    const fields = "names.common,capitals,region,codes.alpha_3,flag.url_png,flag.url_svg,population,area";
-    const list = [];
-    let offset = 0;
-    let more = true;
-    while (more) {
-        const url = `https://api.restcountries.com/countries/v5?limit=100&offset=${offset}&response_fields=${fields}`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
-        if (!res.ok) throw new Error(`Request failed (${res.status})`);
-        const json = await res.json();
-        list.push(...(json.data?.objects ?? []));
-        more = json.data?.meta?.more === true;
-        offset += 100;
+// The country list is saved in the browser for 7 days, so a visitor uses the API only
+// 3 times a week (not 3 times on every page load). The free plan allows 500 requests a month.
+const CACHE_KEY = "vexillo-countries-v1";
+const CACHE_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Read the saved list. With allowOld = true an expired list is accepted too (a back-up when the API fails)
+function readSavedCountries(allowOld) {
+    try {
+        const saved = JSON.parse(localStorage.getItem(CACHE_KEY));
+        const fresh = saved && Date.now() - saved.time < CACHE_MS;
+        if (saved?.list?.length && (fresh || allowOld)) return saved.list;
+    } catch (error) {
+        console.error(error); // damaged data: ignore it and ask the API
     }
-    return list.sort((a, b) => (a.names?.common ?? "").localeCompare(b.names?.common ?? ""));
+    return null;
+}
+
+function saveCountries(list) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), list }));
+    } catch (error) {
+        console.error(error); // storage full or blocked: the app still works, it just asks again next time
+    }
+}
+
+// Fetch every country, 100 at a time (the free plan's maximum page size).
+// FIELDS has everything the details and Compare need, so no other request is needed later.
+async function fetchAllCountries() {
+    const saved = readSavedCountries(false);
+    if (saved) return saved;
+
+    try {
+        const list = [];
+        let offset = 0;
+        let more = true;
+        while (more) {
+            const json = await apiGet(`https://api.restcountries.com/countries/v5?limit=100&offset=${offset}&response_fields=${FIELDS}`);
+            list.push(...(json.data?.objects ?? []));
+            more = json.data?.meta?.more === true;
+            offset += 100;
+        }
+        list.sort((a, b) => (a.names?.common ?? "").localeCompare(b.names?.common ?? ""));
+        saveCountries(list);
+        return list;
+    } catch (error) {
+        const old = readSavedCountries(true); // API failed (quota, key, offline): use the old saved list
+        if (old) return old;
+        throw error;
+    }
 }
 
 // Load all countries once, showing the given loader while it loads
@@ -551,7 +613,7 @@ async function showAllFlags(event) {
         await loadAllCountries(document.querySelector("#flags-loader"));
         renderAllFlags();
     } catch (error) {
-        flagsError.textContent = "Could not load the flags. Please try again.";
+        flagsError.textContent = `Could not load the flags${errorNote(error)}. Please try again.`;
         flagsError.classList.remove("hidden");
         console.error(error);
     }
@@ -604,7 +666,7 @@ regionForm.addEventListener("submit", async (event) => {
         regionList = inRegion;
         renderRegion();
     } catch (error) {
-        regionsError.textContent = "Could not load the flags. Please try again.";
+        regionsError.textContent = `Could not load the flags${errorNote(error)}. Please try again.`;
         regionsError.classList.remove("hidden");
         console.error(error);
     }
@@ -634,7 +696,7 @@ async function showFavourites(event) {
             .map(({ fav, country }) => favouriteCard(country, fav.code));
         favGrid.replaceChildren(...cards);
     } catch (error) {
-        favError.textContent = "Could not load your favourites. Please try again.";
+        favError.textContent = `Could not load your favourites${errorNote(error)}. Please try again.`;
         favError.classList.remove("hidden");
         console.error(error);
     }
@@ -755,7 +817,7 @@ compareForm.addEventListener("submit", async (event) => {
         compareView.classList.remove("hidden");
         compareView.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-        compareError.textContent = "Could not load the comparison. Please try again.";
+        compareError.textContent = `Could not load the comparison${errorNote(error)}. Please try again.`;
         compareError.classList.remove("hidden");
         console.error(error);
     } finally {

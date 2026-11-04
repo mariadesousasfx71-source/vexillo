@@ -60,11 +60,12 @@ Everything runs in the browser. `index.html` holds the page and its four views (
 
 | What | REST Countries v5 endpoint | Used for |
 | --- | --- | --- |
-| Search by name | `/countries/v5/name?q=India` | The search box |
-| One country by code | `/countries/v5/codes.alpha_3/IND` | Border chips, flag cards, Compare |
-| All countries, 100 at a time | `/countries/v5?limit=100&offset=0` | All Flags, Regions, Favourites, instant suggestions |
+| All countries, 100 at a time | `/countries/v5?limit=100&offset=0` | Everything: search, suggestions, details, border chips, All Flags, Regions, Favourites, Compare |
+| Search by name (back-up) | `/countries/v5/name?q=India` | Only if the full list could not be loaded |
+| One country by code (back-up) | `/countries/v5/codes.alpha_3/IND` | Only if the full list could not be loaded |
 
 - The full country list is loaded **once** (100 per request, the free plan's limit) while the splash screen shows, then reused by every view.
+- The list is also **saved in the browser for 7 days** (`localStorage`), so a returning visitor uses no API requests at all. If the API ever refuses a request (for example the monthly limit is used up), the app falls back to the last saved list and keeps working.
 - `response_fields` asks the API only for the fields the app needs.
 - Favourites are saved in `localStorage` as JSON.
 
@@ -74,11 +75,11 @@ Everything runs in the browser. `index.html` holds the page and its four views (
 
 1. Clone or download the repository.
 2. Open the folder in VS Code.
-3. Right-click `index.html` → **Open with Live Server**.
+3. Right-click `index.html` → **Open with Live Server**. Live Server opens `http://127.0.0.1:5500`, so `127.0.0.1` must be in the key's allowed hostnames (see below).
 
 No `npm install` needed: Tailwind loads from a CDN.
 
-> **API key:** the REST Countries key in `app.js` only works on the websites listed in its settings (localhost and the Vercel address). To run Vexillo elsewhere, create a free key at [restcountries.com](https://restcountries.com), add your site's hostname to it, and replace `API_KEY` in `app.js`. The free plan allows 1,000 requests a month.
+> **API key:** the REST Countries key in `app.js` only works on the websites listed in its settings: `localhost`, `127.0.0.1` and the Vercel address. Opening `index.html` directly from the disk (`file://`) is not allowed. To run Vexillo elsewhere, create a free key at [restcountries.com](https://restcountries.com), add your site's hostname to it, and replace `API_KEY` in `app.js`. The free plan allows 500 requests a month; the saved country list (above) keeps the app well inside that.
 
 ---
 
