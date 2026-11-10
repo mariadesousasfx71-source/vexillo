@@ -15,10 +15,25 @@ const getSizeLabel = (population) => {
 
 // Favourites: saved in the browser (localStorage) so they stay after a refresh.
 // Each item: { code, name, flag }
-const favourites = JSON.parse(localStorage.getItem("favourites") || "[]");
+// localStorage can be blocked (some browsers' privacy settings, some file:// pages). Reading it
+// outside try/catch would stop the WHOLE script, so the page would not work at all.
+function loadFavourites() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("favourites") || "[]");
+        return Array.isArray(saved) ? saved : [];
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+const favourites = loadFavourites();
 
 function saveFavourites() {
-    localStorage.setItem("favourites", JSON.stringify(favourites));
+    try {
+        localStorage.setItem("favourites", JSON.stringify(favourites));
+    } catch (error) {
+        console.error(error); // storage blocked: favourites still work until the page is closed
+    }
 }
 
 function isFavourite(code) {
@@ -114,7 +129,15 @@ favBtn.addEventListener("click", () => {
 // (see fetchAllCountries below) and then reuses it. These calls are only a back-up.
 async function apiGet(url) {
     // Give up after 10 seconds, so a blocked or very slow connection shows a message instead of a spinner that never stops
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` }, signal: AbortSignal.timeout(10000) });
+    // (AbortSignal.timeout is missing in older browsers, so build the timeout by hand)
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new DOMException("Timed out", "TimeoutError")), 10000);
+    let res;
+    try {
+        res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` }, signal: controller.signal });
+    } finally {
+        clearTimeout(timer);
+    }
     if (!res.ok) {
         const error = new Error(`Request failed (${res.status})`);
         error.status = res.status; // 401/403 = key refused or quota used up, 429 = too many requests
@@ -505,11 +528,52 @@ function saveCountries(list) {
     }
 }
 
+// Turn the backup rows (countries-backup.js) into the same shape the API returns,
+// so the rest of the app does not need to know where the data came from
+function backupCountries() {
+    if (typeof BACKUP_COUNTRIES === "undefined") return null; // file missing
+    const list = (s) => (s ? s.split("|") : []);
+    return BACKUP_COUNTRIES.map(([common, official, a2, a3, capitals, region, subregion, population, area, borders, currencies, languages]) => {
+        const code = a2.toLowerCase();
+        return {
+            names: { common, official },
+            codes: { alpha_2: a2, alpha_3: a3 },
+            capitals: list(capitals).map((name) => ({ name })),
+            flag: {
+                url_png: code ? `https://flags.restcountries.com/v5/w640/${code}.png` : "",
+                url_svg: code ? `https://flags.restcountries.com/v5/svg/${code}.svg` : "",
+            },
+            region,
+            subregion,
+            population,
+            area: { kilometers: area },
+            borders: borders ? borders.split(" ") : [],
+            currencies: list(currencies).map((c) => {
+                const [name, symbol] = c.split("~");
+                return { name, symbol };
+            }),
+            languages: list(languages).map((name) => ({ name })),
+            links: {}, // "Show map" then uses a Google Maps search link
+        };
+    });
+}
+
 // Fetch every country, 100 at a time (the free plan's maximum page size).
 // FIELDS has everything the details and Compare need, so no other request is needed later.
+// If the API cannot be used, the last saved list or the backup file is used instead.
 async function fetchAllCountries() {
     const saved = readSavedCountries(false);
     if (saved) return saved;
+
+    // Opened straight from the disk (double-click on index.html): the API key only accepts
+    // the listed websites, so do not even ask; use the backup list straight away
+    if (location.protocol === "file:") {
+        const backup = backupCountries();
+        if (backup) {
+            console.info("Vexillo: opened from a file, using the backup country list (countries-backup.js).");
+            return backup;
+        }
+    }
 
     try {
         const list = [];
@@ -527,6 +591,11 @@ async function fetchAllCountries() {
     } catch (error) {
         const old = readSavedCountries(true); // API failed (quota, key, offline): use the old saved list
         if (old) return old;
+        const backup = backupCountries(); // nothing saved yet: use the backup file
+        if (backup) {
+            console.warn("Vexillo: the API could not be used, so the backup country list is shown.", error);
+            return backup;
+        }
         throw error;
     }
 }
