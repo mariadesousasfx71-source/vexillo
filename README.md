@@ -56,7 +56,7 @@ Built as my **Milestone 2 project (JavaScript Mastery)** for the Full Stack Deve
 
 ## How It Works
 
-Everything runs in the browser. `index.html` holds the page and its four views (Home, All Flags, Regions, Favourites), and `app.js` fetches the data and builds the page.
+Everything runs in the browser. `index.html` holds the page and its four views (Home, All Flags, Regions, Favourites), `app.js` fetches the data and builds the page, and `countries-backup.js` is the back-up country list.
 
 | What | REST Countries v5 endpoint | Used for |
 | --- | --- | --- |
@@ -66,6 +66,7 @@ Everything runs in the browser. `index.html` holds the page and its four views (
 
 - The full country list is loaded **once** (100 per request, the free plan's limit) while the splash screen shows, then reused by every view.
 - The list is also **saved in the browser for 7 days** (`localStorage`), so a returning visitor uses no API requests at all. If the API ever refuses a request (for example the monthly limit is used up), the app falls back to the last saved list and keeps working.
+- If there is no saved list either, the app uses `countries-backup.js` (a copy of the country list saved from the API), so it never shows an empty page.
 - `response_fields` asks the API only for the fields the app needs.
 - Favourites are saved in `localStorage` as JSON.
 
@@ -73,13 +74,12 @@ Everything runs in the browser. `index.html` holds the page and its four views (
 
 ## How to Run Locally
 
-1. Clone or download the repository.
-2. Open the folder in VS Code.
-3. Right-click `index.html` → **Open with Live Server**. Live Server opens `http://127.0.0.1:5500`, so `127.0.0.1` must be in the key's allowed hostnames (see below).
+1. Clone or download the repository (keep all the files together in one folder).
+2. **Either** double-click `index.html` to open it in your browser, **or** open the folder in VS Code and right-click `index.html` → **Open with Live Server**.
 
-No `npm install` needed: Tailwind loads from a CDN.
+That's all: no `npm install` and no API key needed. An internet connection is needed for the styling (Tailwind loads from a CDN), the fonts, the flag pictures and the map.
 
-> **API key:** the REST Countries key in `app.js` only works on the websites listed in its settings: `localhost`, `127.0.0.1` and the Vercel address. Opening `index.html` directly from the disk (`file://`) is not allowed. To run Vexillo elsewhere, create a free key at [restcountries.com](https://restcountries.com), add your site's hostname to it, and replace `API_KEY` in `app.js`. The free plan allows 500 requests a month; the saved country list (above) keeps the app well inside that.
+> **API key and the backup list:** the REST Countries key in `app.js` only works on the websites listed in its settings (`localhost`, `127.0.0.1` and the Vercel address). When the page is opened straight from the disk (`file://`), from any other address, or when the API refuses the request (for example the free plan's monthly limit is used up), Vexillo uses **`countries-backup.js`**, a saved copy of all 254 countries, so every feature still works. The only difference: *Show map* uses a Google Maps search instead of the API's map link.
 
 ---
 
